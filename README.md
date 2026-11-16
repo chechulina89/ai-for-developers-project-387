@@ -32,8 +32,13 @@ comments. The workflow lives in
 the `anomalyco/opencode/github` action.
 
 - **Event:** `issue_comment` with `types: [created]` only.
-- **Model:** `anthropic/claude-sonnet-5-5`; the provider key is stored in the
-  `ANTHROPIC_API_KEY` GitHub secret and is never committed.
+- **Model:** `opencode/big-pickle` — a free model from the opencode Zen
+  provider (reasoning and tool calling supported). **Decision:** no paid model
+  key is required, so no model secret is stored in GitHub Secrets; this is a
+  conscious deviation from the default setup, recorded here. To switch to a
+  paid model later (for example `anthropic/claude-sonnet-5-5`), set the
+  provider's key as a repository secret (for example `ANTHROPIC_API_KEY`) and
+  update `model` in the workflow.
 - **Purpose:** answer questions about issues, triage them, and propose fixes
   from a comment command.
 - **Results:** the agent replies as an issue comment and links its workflow

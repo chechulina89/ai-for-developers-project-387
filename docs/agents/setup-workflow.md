@@ -16,7 +16,7 @@ comment command in an issue.
 | Setting      | Value                                        |
 | ------------ | -------------------------------------------- |
 | Event        | `issue_comment`, `types: [created]` only     |
-| Model        | `anthropic/claude-sonnet-5-5`                |
+| Model        | `opencode/big-pickle` (free, no API key)     |
 | `mentions`   | `/oc,/opencode`                              |
 | `share`      | `false` (sessions are not published)         |
 | Permissions  | `contents: read`, `id-token: write`          |
@@ -49,12 +49,19 @@ granting `contents: write`, `issues: write`, and `pull-requests: write` to
 `GITHUB_TOKEN`. It was rejected for this repository; if it is ever adopted,
 record the reason here and in `README.md`.
 
-### 2. Add the model key to GitHub Secrets
+### 2. Model key
 
-Settings → Secrets and variables → Actions → New repository secret:
+The configured model `opencode/big-pickle` is free and needs **no API key**, so
+no GitHub secret is required. This is a deliberate deviation from the default
+paid-model setup.
 
-- **Name:** `ANTHROPIC_API_KEY`
-- **Value:** the Anthropic API key for the configured model
+To switch to a paid model later (for example `anthropic/claude-sonnet-5-5`):
+
+1. Settings → Secrets and variables → Actions → New repository secret:
+   - **Name:** `ANTHROPIC_API_KEY`
+   - **Value:** the provider API key
+2. Change `model` in `.github/workflows/opencode.yml` and add the secret to
+   the step's `env`.
 
 ### 3. Verify the run
 
@@ -78,6 +85,7 @@ The runner checks out this repository, so the skills from the first project
   posted before the workflow was merged do not trigger it — post a new one.
 - **Run fails on OIDC exchange:** the opencode-agent App is not installed on
   the repository.
-- **Run fails on model call:** `ANTHROPIC_API_KEY` is missing or invalid.
+- **Run fails on model call:** the model ID is wrong for the configured
+  provider, or (paid models only) the provider secret is missing.
 - **Comment ignored:** the author is a bot, lacks the required association,
   or the comment does not contain a `mentions` command.

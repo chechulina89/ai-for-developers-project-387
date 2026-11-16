@@ -33,9 +33,7 @@ jobs:
 
       - name: Run opencode
         uses: anomalyco/opencode/github@latest
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         with:
-          model: anthropic/claude-sonnet-5-5
+          model: opencode/big-pickle
           mentions: /oc,/opencode
           share: false
