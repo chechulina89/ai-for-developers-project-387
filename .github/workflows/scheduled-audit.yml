@@ -1,0 +1,104 @@
+name: scheduled-audit
+
+on:
+  schedule:
+    # At most once per day: 06:00 UTC.
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: scheduled-audit
+  cancel-in-progress: false
+
+env:
+  # Educational finding used to demonstrate issue creation and duplicate
+  # protection. Real audit findings can reuse the same marker format.
+  AUDIT_FINDING_KEY: 'scheduled-audit-demo:workflow-coverage'
+  AUDIT_FINDING_TITLE: 'Учебный аудит: проверить покрытие workflow-процессов'
+  AUDIT_LABEL: 'scheduled-audit'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      APP_URL: ${{ vars.APP_URL }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Collect audit data
+        id: audit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p audit-report
+          {
+            printf '# Scheduled Audit Report\n\n'
+            printf -- '- run: %s\n' "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            printf -- '- ref: %s\n' "$GITHUB_REF_NAME"
+            printf -- '- sha: %s\n' "$GITHUB_SHA"
+            printf -- '- event: %s\n' "$GITHUB_EVENT_NAME"
+            printf -- '- app_url_configured: %s\n' "${APP_URL:+yes}"
+            printf -- '- finding_key: `%s`\n' "$AUDIT_FINDING_KEY"
+            printf '\n## Finding\n\n'
+            printf '%s\n' "$AUDIT_FINDING_TITLE"
+            printf '\nЭто явно учебная находка для проверки создания issue и защиты от дублей.\n'
+          } > audit-report/report.md
+
+          if [ -z "$APP_URL" ]; then
+            printf '\n## Warning\n\nRepository variable APP_URL is not configured.\n' >> audit-report/report.md
+          fi
+
+          gh issue list \
+            --state all \
+            --label "$AUDIT_LABEL" \
+            --search "\"$AUDIT_FINDING_KEY\" in:title" \
+            --json number,title \
+            --jq 'length' > issue-count.txt
+
+      - name: Create issue for new finding
+        id: issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          count="$(cat issue-count.txt)"
+          if [ "$count" != "0" ]; then
+            echo "created=false" >> "$GITHUB_OUTPUT"
+            echo "existing=true" >> "$GITHUB_OUTPUT"
+            echo "Existing audit issue found; duplicate was not created." >> audit-report/report.md
+            exit 0
+          fi
+
+          url="$(gh issue create \
+            --title "$AUDIT_FINDING_TITLE" \
+            --label "$AUDIT_LABEL" \
+            --body "$(cat <<EOF
+          $AUDIT_FINDING_KEY
+
+          Учебная находка периодического аудита.
+
+          Источник: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+
+          Задача: убедиться, что периодический workflow доступен на main, сохраняет артефакт и не создаёт дубликаты. После проверки issue можно закрыть.
+          EOF
+          )")"
+          echo "created=true" >> "$GITHUB_OUTPUT"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Created audit issue: $url" >> audit-report/report.md
+
+      - name: Save audit output
+        run: cat audit-report/report.md
+
+      - name: Upload audit report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scheduled-audit-report-${{ github.run_id }}
+          path: audit-report/report.md
+          retention-days: 30
