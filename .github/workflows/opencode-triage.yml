@@ -1,0 +1,58 @@
+name: opencode-triage
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: triage-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Triage runs only for new requests from trusted humans.
+    # Tickets prepared by the to-spec/to-tickets skills are opened with the
+    # ready-for-agent label and are skipped (label is present at `opened`).
+    if: |
+      github.event.issue.user.type != 'Bot' &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association) &&
+      !contains(github.event.issue.labels.*.name, 'ready-for-agent')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Run opencode triage
+        uses: anomalyco/opencode/github@latest
+        with:
+          model: opencode/deepseek-v4.1-flash-free
+          share: false
+          prompt: |
+            Ты — триаж-агент этого репозитория. Тебя вызвали на новое обращение
+            (issue) #${{ github.event.issue.number }}.
+
+            1. Прочитай issue, глоссарий GLOSSARY.md и правила из
+               docs/agents/issue-tracker.md и docs/agents/triage-labels.md.
+            2. Если обращение уже является готовым тикетом скиллов
+               (есть метка ready-for-agent или секции Parent/Blocked by в теле) —
+               НЕ разбирай его повторно: коротко ответь комментарием, что тикет
+               готов к работе, и завершай.
+            3. Иначе разбери потребность с учётом существующего приложения
+               (apps/web, apps/api): кратко опиши, что просит пользователь и как
+               это соотносится с текущим поведением.
+            4. Поставь ровно одну триаж-метку из docs/agents/triage-labels.md
+               через gh issue edit:
+               - needs-info — если не хватает данных (тогда задай уточняющие
+                 вопросы комментарием);
+               - ready-for-agent — если задача полностью специфицирована;
+               - ready-for-human — если требуется ручная реализация;
+               - wontfix — если делать не будем (обоснуй в комментарии).
+            5. Итог опубликуй комментарием в issue.

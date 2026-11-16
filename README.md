@@ -79,6 +79,25 @@ previous run) and time out after 30 minutes. See
 [`docs/agents/setup-workflow.md`](./docs/agents/setup-workflow.md) for setup
 details and [`AGENTS.md`](./AGENTS.md) for available skills.
 
+### Auto-triage of new issues
+
+[`.github/workflows/opencode-triage.yml`](./.github/workflows/opencode-triage.yml)
+triages every newly opened issue (`issues: [opened]`) with a fixed `prompt`:
+the agent reads the request against the existing app (`apps/web`, `apps/api`),
+the glossary, and the triage rules, then applies exactly one triage label from
+[`docs/agents/triage-labels.md`](./docs/agents/triage-labels.md) and posts a
+summary comment.
+
+- **Trusted authors only:** the job starts only for `OWNER`, `MEMBER`, or
+  `COLLABORATOR` authors; bot-opened issues are ignored.
+- **Skill tickets are not re-triaged:** tickets published by the `to-spec` /
+  `to-tickets` skills carry the `ready-for-agent` label at creation and are
+  skipped by the job condition (and again by the prompt as a safeguard).
+- **Limits:** 15 minute timeout; one run per issue (`concurrency` cancels the
+  previous run). Same OIDC permissions as the agent workflow
+  (`contents: read`, `id-token: write`, checkout with
+  `persist-credentials: false`).
+
 ## Development
 
 Use the versions in `mise.toml`, install dependencies with `npm ci`, then run:
