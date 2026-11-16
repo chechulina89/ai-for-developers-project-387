@@ -121,6 +121,42 @@ line-level findings without changing the branch.
   requires issue/specification links, human approval, checks, an impact-based
   risk rationale, and a rollback procedure.
 
+### Scheduled audit
+
+[`.github/workflows/scheduled-audit.yml`](./.github/workflows/scheduled-audit.yml)
+runs a periodic audit **once per day at 06:00 UTC** (`schedule`) and manually
+via `workflow_dispatch` (**Run workflow** on the Actions page). The job is
+limited to 10 minutes (`timeout-minutes`), and concurrent audits are grouped
+by `concurrency: scheduled-audit`. Permissions are minimal for what it does:
+`contents: read` plus `issues: write` for opening a finding issue.
+
+- **Inputs:** optional repository variable `APP_URL`
+  (**Settings → Secrets and variables → Actions → Variables**) is passed to
+  the job; when it is missing the report records a warning instead of
+  failing.
+- **Output:** the report is written to `audit-report/report.md` and saved as
+  a workflow artifact (`scheduled-audit-report-<run_id>`, kept 30 days).
+  Reports never enter commits.
+- **Deduplication:** every finding carries a stable key; before creating an
+  issue the workflow lists issues with the `scheduled-audit` label and skips
+  creation when the key already exists in a title or body.
+- **Verified runs:**
+  [43842291470](https://github.com/chechulina89/ai-for-developers-project-387/actions/runs/43842291470)
+  created issue #13 (demo finding); repeat run
+  [43842933535](https://github.com/chechulina89/ai-for-developers-project-387/actions/runs/43842933535)
+  reported "Existing audit issue found; duplicate was not created."
+
+**Личные выводы.** Агент оказался полезен как исполнитель механических шагов,
+но потребовались три уточнения постановки: (1) дедупликацию нельзя строить на
+GitHub search по заголовку — ключ с двоеточием там не матчится, пришлось
+перейти на точное сравнение через `jq` и локальный прогон фильтра; (2) `gh` в
+workflow не поддерживает `--arg`, это всплыло только на живом запуске;
+(3) доступ к настройкам репозитория (переменные, rerun, workflow permissions)
+из-под токена приложения ограничен 403, поэтому часть действий осталась
+ручными через UI. Изменения в настройках/постановке по итогу: создана метка
+`scheduled-audit`, два раза исправлен фильтр дедупликации, добавлена
+толерантность к отсутствующему `APP_URL` (warning вместо падения).
+
 ## Development
 
 Use the versions in `mise.toml`, install dependencies with `npm ci`, then run:
