@@ -98,6 +98,29 @@ summary comment.
   (`contents: read`, `id-token: write`, checkout with
   `persist-credentials: false`).
 
+### Independent pull request review
+
+[`.github/workflows/opencode-review.yml`](./.github/workflows/opencode-review.yml)
+starts an independent author review on `pull_request` events (`opened`,
+`synchronize`, and `reopened`). The reviewer receives the mandatory calendar
+criteria from [`REVIEW.md`](./REVIEW.md), reads the linked GitHub Issues
+specification and the PR diff, and leaves both an overall verdict and
+line-level findings without changing the branch.
+
+- **Trusted authors only:** bot PRs and PRs from untrusted contributors are
+  skipped. The workflow uses least-privilege `contents: read`,
+  `pull-requests: write`, and `id-token: write` permissions.
+- **Stale review cancellation:** a new commit cancels the review for the
+  previous head of that PR; every review has a 15-minute timeout.
+- **Run budget before the model:** [`scripts/review-budget.mjs`](./scripts/review-budget.mjs)
+  checks the number of earlier workflow runs for the PR branch before the
+  model step. At the `MAX_REVIEW_RUNS` limit (currently three), it refuses the
+  review, comments with the exact head SHA and Actions-log URL, and never
+  calls the model.
+- **PR evidence:** [the PR template](./.github/pull_request_template.md)
+  requires issue/specification links, human approval, checks, an impact-based
+  risk rationale, and a rollback procedure.
+
 ## Development
 
 Use the versions in `mise.toml`, install dependencies with `npm ci`, then run:

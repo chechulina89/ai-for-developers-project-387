@@ -1,0 +1,67 @@
+name: opencode-review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+# A new push cancels the outdated review of the previous head.
+concurrency:
+  group: review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  # Maximum number of auto-review runs per pull request. Enforced in code
+  # (scripts/review-budget.mjs) before the model is ever called.
+  MAX_REVIEW_RUNS: '3'
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Independent review runs only for PRs from trusted humans; bot PRs are
+    # ignored.
+    if: |
+      github.event.pull_request.user.type != 'Bot' &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association)
+    steps:
+      - name: Checkout pull request head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Enforce review run budget (before model call)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          POST_COMMENT: '1'
+        run: node scripts/review-budget.mjs
+
+      - name: Run opencode review
+        uses: anomalyco/opencode/github@latest
+        with:
+          model: opencode/deepseek-v4.1-flash-free
+          share: false
+          prompt: |
+            Ты — независимый ревьюер PR #${{ github.event.pull_request.number }}
+            этого репозитория. Ты не участвовал в реализации: сверяй результат
+            со спецификацией, а не с намерением автора.
+
+            1. Прочитай критерии из REVIEW.md — они обязательны.
+            2. Найди в теле PR ссылки на спецификацию и исходное обращение
+               (GitHub Issues) и прочитай их через gh issue view.
+            3. Изучи diff: git diff origin/${{ github.base_ref }}...HEAD.
+            4. Проверь соответствие каждому критерию REVIEW.md: сценарии
+               спецификации, тесты, границы изменений, стиль, риск и откат.
+            5. Оставь на PR ревью через gh: один общий комментарий с вердиктом
+               (approve / changes requested и почему) и по одному комментарию
+               к конкретной строке diff на каждое замечание. Не правь код.
+            6. Замечаний нет — напиши это явно в общем комментарии.
