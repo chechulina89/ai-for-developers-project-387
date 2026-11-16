@@ -1,5 +1,22 @@
 import { expect, test } from '@playwright/test';
 
+test('calendar keeps unavailable dates visible, disabled, and described', async ({
+  page,
+}) => {
+  await page.goto('/booking');
+
+  const calendar = page.getByRole('group', { name: 'Даты встречи' });
+  const unavailableDate = calendar.locator('button:disabled').first();
+  const availableDate = calendar.locator('button:not([disabled])').first();
+
+  await expect(calendar.getByRole('button')).toHaveCount(14);
+  await expect(unavailableDate).toBeVisible();
+  await expect(unavailableDate).toBeDisabled();
+  await expect(unavailableDate).toHaveClass(/date-unavailable/);
+  await expect(unavailableDate).toHaveAccessibleName(/нет свободного времени$/);
+  await expect(availableDate).toBeEnabled();
+});
+
 test('guest books a slot and the owner sees the meeting', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/owner');
@@ -264,6 +281,12 @@ test('concurrent guests see a conflict without losing their form data', async ({
         hasText: 'Это время уже заняли. Выберите другое.',
       }),
     ).toBeVisible();
+    const refreshedCalendar = conflictPage.getByRole('group', {
+      name: 'Даты встречи',
+    });
+    await expect(
+      refreshedCalendar.locator('button:disabled').first(),
+    ).toHaveClass(/date-unavailable/);
     await expect(
       conflictPage.getByRole('textbox', { name: /Имя/ }),
     ).toHaveValue(conflictPage === firstPage ? 'Гость Один' : 'Гость Два');
