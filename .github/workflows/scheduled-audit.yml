@@ -59,9 +59,11 @@ jobs:
           gh issue list \
             --state all \
             --label "$AUDIT_LABEL" \
-            --search "\"$AUDIT_FINDING_KEY\" in:title" \
-            --json number,title \
-            --jq 'length' > issue-count.txt
+            --limit 100 \
+            --json title,body \
+            --jq --arg marker "$AUDIT_FINDING_KEY" \
+            '[.[] | select(.title | contains($marker) or (.body // "") | contains($marker))] | length' \
+            > issue-count.txt
 
       - name: Create issue for new finding
         id: issue
