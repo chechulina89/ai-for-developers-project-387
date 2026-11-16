@@ -73,9 +73,11 @@ const message =
 console.log(message);
 
 if (POST_COMMENT === '1') {
-  execFileSync('gh', ['pr', 'comment', PR_NUMBER, '--body', message], {
-    stdio: 'inherit',
-  });
+  execFileSync(
+    'gh',
+    ['pr', 'review', PR_NUMBER, '--comment', '--body', message],
+    { stdio: 'inherit' },
+  );
 }
 
 process.exit(1);

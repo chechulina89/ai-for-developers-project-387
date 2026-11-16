@@ -307,6 +307,72 @@ describe('booking page', () => {
     expect(api.createBooking).not.toHaveBeenCalled();
   });
 
+  it('keeps unavailable dates visible, consistently disabled, and described to assistive technology', async () => {
+    render(<App />);
+
+    const calendar = await screen.findByRole('group', {
+      name: 'Даты встречи',
+    });
+    const dates = within(calendar).getAllByRole('button');
+    const unavailableDates = dates.filter((button) =>
+      button.hasAttribute('disabled'),
+    );
+
+    expect(dates).toHaveLength(14);
+    expect(unavailableDates).toHaveLength(13);
+    expect(
+      unavailableDates.every((button) =>
+        button.classList.contains('date-unavailable'),
+      ),
+    ).toBe(true);
+    expect(
+      unavailableDates.every((button) =>
+        button.getAttribute('aria-label')?.endsWith(', нет свободного времени'),
+      ),
+    ).toBe(true);
+    expect(dates[0]?.hasAttribute('disabled')).toBe(false);
+    expect(dates[0]?.classList.contains('date-unavailable')).toBe(false);
+  });
+
+  it('recomputes unavailable dates after changing duration', async () => {
+    api.getAvailability
+      .mockImplementationOnce(
+        (_meetingTypeId: string, params: { from: string; to: string }) =>
+          Promise.resolve({
+            status: 200,
+            data: createAvailability(params.from, params.to),
+          }),
+      )
+      .mockImplementationOnce(
+        (_meetingTypeId: string, params: { from: string; to: string }) =>
+          Promise.resolve({
+            status: 200,
+            data: createAvailability(params.from, params.to, false),
+          }),
+      );
+
+    render(<App />);
+
+    const durationGroup = await screen.findByRole('group', {
+      name: 'Длительность встречи',
+    });
+    fireEvent.click(
+      within(durationGroup).getByRole('button', { name: '45 минут' }),
+    );
+
+    expect(
+      await screen.findByText(
+        'В ближайшие 14 дней свободного времени нет, попробуйте позже.',
+      ),
+    ).toBeTruthy();
+    const calendar = screen.getByRole('group', { name: 'Даты встречи' });
+    expect(
+      within(calendar)
+        .getAllByRole('button')
+        .every((button) => button.hasAttribute('disabled')),
+    ).toBe(true);
+  });
+
   it('refreshes availability after a slot conflict and keeps form data', async () => {
     api.getAvailability
       .mockImplementationOnce(
@@ -356,6 +422,17 @@ describe('booking page', () => {
       '+7 700 111 22 33',
     );
     expect(api.getAvailability).toHaveBeenCalledTimes(2);
+    const refreshedDates = within(
+      screen.getByRole('group', { name: 'Даты встречи' }),
+    ).getAllByRole('button');
+    expect(
+      refreshedDates.every((button) => button.hasAttribute('disabled')),
+    ).toBe(true);
+    expect(
+      refreshedDates.every((button) =>
+        button.getAttribute('aria-label')?.endsWith(', нет свободного времени'),
+      ),
+    ).toBe(true);
   });
 });
 

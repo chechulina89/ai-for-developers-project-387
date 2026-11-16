@@ -19,6 +19,7 @@ shared publicly (`share: false`).
 ### Available skills
 
 The agent has access to:
+
 - **issue-tracker**: GitHub Issues management with `gh` CLI
 - **triage-labels**: Apply triage labels from the configured set
 - **domain**: Access to `GLOSSARY.md` and decisions in `docs/adr/`
