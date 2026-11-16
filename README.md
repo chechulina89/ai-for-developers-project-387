@@ -32,9 +32,12 @@ comments. The workflow lives in
 the `anomalyco/opencode/github` action.
 
 - **Event:** `issue_comment` with `types: [created]` only.
-- **Model:** `opencode/big-pickle` — a free model from the opencode Zen
-  provider (reasoning and tool calling supported). **Decision:** no paid model
-  key is required, so no model secret is stored in GitHub Secrets; this is a
+- **Model:** `opencode/deepseek-v4.1-flash-free` — a free model from the
+  opencode Zen provider with tool calling, chosen for speed: multi-step tasks
+  (publishing specs and tickets) must fit the job timeout. The slower free
+  `opencode/big-pickle` model was tried first and could not finish
+  publication tasks within 30 minutes. **Decision:** no paid model key is
+  required, so no model secret is stored in GitHub Secrets; this is a
   conscious deviation from the default setup, recorded here. To switch to a
   paid model later (for example `anthropic/claude-sonnet-5-5`), set the
   provider's key as a repository secret (for example `ANTHROPIC_API_KEY`) and

@@ -16,7 +16,7 @@ comment command in an issue.
 | Setting      | Value                                        |
 | ------------ | -------------------------------------------- |
 | Event        | `issue_comment`, `types: [created]` only     |
-| Model        | `opencode/big-pickle` (free, no API key)     |
+| Model        | `opencode/deepseek-v4.1-flash-free` (free, no API key) |
 | `mentions`   | `/oc,/opencode`                              |
 | `share`      | `false` (sessions are not published)         |
 | Permissions  | `contents: read`, `id-token: write`          |
@@ -51,9 +51,11 @@ record the reason here and in `README.md`.
 
 ### 2. Model key
 
-The configured model `opencode/big-pickle` is free and needs **no API key**, so
-no GitHub secret is required. This is a deliberate deviation from the default
-paid-model setup.
+The configured model `opencode/deepseek-v4.1-flash-free` is free and needs
+**no API key**, so no GitHub secret is required. It was chosen for speed:
+the slower free `opencode/big-pickle` model could not finish multi-step
+publishing tasks within the job timeout. This is a deliberate deviation from
+the default paid-model setup.
 
 To switch to a paid model later (for example `anthropic/claude-sonnet-5-5`):
 
