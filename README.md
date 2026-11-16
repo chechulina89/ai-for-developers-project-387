@@ -24,6 +24,33 @@ The current profile is explicitly a demo placeholder. Bookings, idempotency
 keys, and owner sessions are held in memory by one API process and can be lost
 when it restarts. Do not enter real personal data.
 
+## AI Agent Workflow
+
+The repository includes an automated agent workflow that responds to commands in
+GitHub issue comments. The workflow is configured in
+[`.github/workflows/agent-invoke.yml`](./.github/workflows/agent-invoke.yml).
+
+### Invoking the agent
+
+In any issue, add a comment with a command:
+
+```
+/oc explain this issue
+/oc triage
+/oc review-pr
+```
+
+The agent workflow will:
+
+1. Parse the `/oc <command>` from your comment
+2. Verify you have write access to the repository
+3. Execute the command and post results as a reply comment
+
+**Requirements:**
+- You must be the issue author, repository owner, or collaborator with write access
+- The model API key must be configured in GitHub Secrets (`COPILOT_MODEL_API_KEY`)
+- See [`AGENTS.md`](./AGENTS.md) for available commands and [`docs/agents/`](./docs/agents/) for configuration
+
 ## Development
 
 Use the versions in `mise.toml`, install dependencies with `npm ci`, then run:

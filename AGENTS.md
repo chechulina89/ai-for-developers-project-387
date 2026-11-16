@@ -1,6 +1,38 @@
-# Project Guidelines
+# Agent Configuration
 
-## Architecture
+## Invoking the agent
+
+The Copilot agent responds to commands in GitHub issue comments using the
+`/oc <command>` syntax. See
+[`.github/workflows/agent-invoke.yml`](./.github/workflows/agent-invoke.yml)
+for the workflow implementation.
+
+### Example commands
+
+```
+/oc explain this issue
+/oc review-pr
+/oc triage
+```
+
+### Available skills
+
+The agent has access to:
+- **issue-tracker**: GitHub Issues management with `gh` CLI
+- **triage-labels**: Apply triage labels from the configured set
+- **domain**: Access to `GLOSSARY.md` and decisions in `docs/adr/`
+- **code-review**: Review code changes for standards and specifications
+- **diagnosing-bugs**: Debug and diagnose issues
+- **research**: Deep investigation with verified sources
+
+See [`docs/agents/`](./docs/agents/) for detailed configuration.
+
+### Verification command
+
+Run `mise run check` to verify all linting, types, tests, builds, and checks
+that the agent would perform on your code.
+
+## Project Architecture
 
 - `apps/web` is the React, Vite, and Mantine frontend.
 - `apps/api` is the Fastify backend; keep its OpenAPI contract in sync.
@@ -31,19 +63,19 @@
 - Do not edit or rename `.github/workflows/hexlet-check.yml`; it is reserved
   for the Hexlet project checks.
 
-## Agent skills
+## Agent configuration details
 
 ### Issue tracker
 
 Issues are tracked in this repository's GitHub Issues. Use `gh` from this
-repository; see `docs/agents/issue-tracker.md`.
+repository; see [`docs/agents/issue-tracker.md`](./docs/agents/issue-tracker.md).
 
 ### Triage labels
 
 Use the default labels `needs-triage`, `needs-info`, `ready-for-agent`,
-`ready-for-human`, and `wontfix`; see `docs/agents/triage-labels.md`.
+`ready-for-human`, and `wontfix`; see [`docs/agents/triage-labels.md`](./docs/agents/triage-labels.md).
 
 ### Domain docs
 
 Use one shared glossary at `GLOSSARY.md` and shared decisions in
-`docs/adr/`; see `docs/agents/domain.md`.
+`docs/adr/`; see [`docs/agents/domain.md`](./docs/agents/domain.md).
