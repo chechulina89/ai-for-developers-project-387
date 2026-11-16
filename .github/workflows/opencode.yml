@@ -1,0 +1,41 @@
+name: opencode
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: opencode-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  opencode:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Only trusted humans can invoke the agent:
+    # - bot comments are ignored
+    # - only OWNER, MEMBER or COLLABORATOR associations pass, so untrusted
+    #   fork contributors never reach the step that receives secrets
+    if: |
+      github.event.comment.user.type != 'Bot' &&
+      contains(github.event.comment.body, '/oc') &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Run opencode
+        uses: anomalyco/opencode/github@latest
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        with:
+          model: anthropic/claude-sonnet-5-5
+          mentions: /oc,/opencode
+          share: false

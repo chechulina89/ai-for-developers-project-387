@@ -2,17 +2,18 @@
 
 ## Invoking the agent
 
-The Copilot agent responds to commands in GitHub issue comments using the
-`/oc <command>` syntax. See
-[`.github/workflows/agent-invoke.yml`](./.github/workflows/agent-invoke.yml)
-for the workflow implementation.
+The [opencode](https://opencode.ai) agent responds to commands in GitHub issue
+comments using `/oc` or `/opencode` (the configured `mentions`). See
+[`.github/workflows/opencode.yml`](./.github/workflows/opencode.yml) for the
+workflow implementation. Only trusted participants (`OWNER`, `MEMBER`,
+`COLLABORATOR`) can trigger it; bot comments are ignored. Sessions are not
+shared publicly (`share: false`).
 
 ### Example commands
 
 ```
 /oc explain this issue
-/oc review-pr
-/oc triage
+/opencode triage
 ```
 
 ### Available skills

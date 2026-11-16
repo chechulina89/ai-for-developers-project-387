@@ -26,30 +26,50 @@ when it restarts. Do not enter real personal data.
 
 ## AI Agent Workflow
 
-The repository includes an automated agent workflow that responds to commands in
-GitHub issue comments. The workflow is configured in
-[`.github/workflows/agent-invoke.yml`](./.github/workflows/agent-invoke.yml).
+The repository runs the [opencode](https://opencode.ai) agent from GitHub issue
+comments. The workflow lives in
+[`.github/workflows/opencode.yml`](./.github/workflows/opencode.yml) and uses
+the `anomalyco/opencode/github` action.
+
+- **Event:** `issue_comment` with `types: [created]` only.
+- **Model:** `anthropic/claude-sonnet-5-5`; the provider key is stored in the
+  `ANTHROPIC_API_KEY` GitHub secret and is never committed.
+- **Purpose:** answer questions about issues, triage them, and propose fixes
+  from a comment command.
+- **Results:** the agent replies as an issue comment and links its workflow
+  run in the Actions tab.
+- **`mentions`:** `/oc,/opencode` — only these command prefixes trigger a run.
+- **`share`:** `false` — sessions are not published to opencode.ai; output is
+  only visible in the issue comment and the Actions log.
+
+### GitHub App
+
+The workflow uses the standard OIDC mode: the
+[**opencode-agent**](https://github.com/apps/opencode-agent) GitHub App must be
+installed on this repository, and the action exchanges an OIDC token
+(`id-token: write`) for an App token used to post comments. Checkout uses
+`persist-credentials: false`, so no Git credentials stay on the runner. The
+alternative `use_github_token: true` mode (no App installation, broader
+`contents: write`/`issues: write` permissions on `GITHUB_TOKEN`) was rejected:
+OIDC keeps the workflow permissions minimal (`contents: read`,
+`id-token: write`).
 
 ### Invoking the agent
 
-In any issue, add a comment with a command:
+In any issue, add a comment starting with one of the `mentions` commands:
 
 ```
 /oc explain this issue
-/oc triage
-/oc review-pr
+/opencode triage
 ```
 
-The agent workflow will:
-
-1. Parse the `/oc <command>` from your comment
-2. Verify you have write access to the repository
-3. Execute the command and post results as a reply comment
-
-**Requirements:**
-- You must be the issue author, repository owner, or collaborator with write access
-- The model API key must be configured in GitHub Secrets (`COPILOT_MODEL_API_KEY`)
-- See [`AGENTS.md`](./AGENTS.md) for available commands and [`docs/agents/`](./docs/agents/) for configuration
+Runs are restricted to trusted participants: comments from bots are ignored,
+and the job only starts when the comment author has `OWNER`, `MEMBER`, or
+`COLLABORATOR` association with the repository. Untrusted fork contributors
+never receive secrets. Runs are limited per issue (`concurrency` cancels the
+previous run) and time out after 30 minutes. See
+[`docs/agents/setup-workflow.md`](./docs/agents/setup-workflow.md) for setup
+details and [`AGENTS.md`](./AGENTS.md) for available skills.
 
 ## Development
 
