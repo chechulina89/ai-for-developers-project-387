@@ -422,17 +422,21 @@ describe('booking page', () => {
       '+7 700 111 22 33',
     );
     expect(api.getAvailability).toHaveBeenCalledTimes(2);
-    const refreshedDates = within(
-      screen.getByRole('group', { name: 'Даты встречи' }),
-    ).getAllByRole('button');
-    expect(
-      refreshedDates.every((button) => button.hasAttribute('disabled')),
-    ).toBe(true);
-    expect(
-      refreshedDates.every((button) =>
-        button.getAttribute('aria-label')?.endsWith(', нет свободного времени'),
-      ),
-    ).toBe(true);
+    await waitFor(() => {
+      const refreshedDates = within(
+        screen.getByRole('group', { name: 'Даты встречи' }),
+      ).getAllByRole('button');
+      expect(
+        refreshedDates.every((button) => button.hasAttribute('disabled')),
+      ).toBe(true);
+      expect(
+        refreshedDates.every((button) =>
+          button
+            .getAttribute('aria-label')
+            ?.endsWith(', нет свободного времени'),
+        ),
+      ).toBe(true);
+    });
   });
 });
 

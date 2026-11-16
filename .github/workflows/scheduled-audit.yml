@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   issues: write
+  id-token: write
 
 concurrency:
   group: scheduled-audit
@@ -93,6 +94,28 @@ jobs:
           echo "created=true" >> "$GITHUB_OUTPUT"
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "Created audit issue: $url" >> audit-report/report.md
+
+      - name: Agent reviews the audit report
+        # The audit itself never fails on model quota exhaustion: the
+        # deterministic report and deduplication above are the deliverable,
+        # the agent only adds a readable summary of the same data.
+        continue-on-error: true
+        uses: anomalyco/opencode/github@latest
+        with:
+          model: opencode/deepseek-v4.1-flash-free
+          share: false
+          prompt: |
+            Ты — агент периодического аудита этого репозитория (сервис
+            записи на встречи). Не исследуй код без необходимости.
+
+            1. Прочитай отчёт audit-report/report.md.
+            2. Если в отчёте есть строка «Created audit issue: <url>» —
+               прокомментируй этот issue через gh: 2-3 предложения, что это
+               учебная находка, как её проверить и когда закрыть.
+            3. Если есть строка «Existing audit issue found» — ничего не
+               комментируй, дубликаты запрещены.
+            4. Если в отчёте warning про APP_URL — упомяни в комментарии,
+               что переменную нужно задать в настройках репозитория.
 
       - name: Save audit output
         run: cat audit-report/report.md
