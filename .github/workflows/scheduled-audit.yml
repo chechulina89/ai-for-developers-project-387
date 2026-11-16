@@ -56,13 +56,12 @@ jobs:
             printf '\n## Warning\n\nRepository variable APP_URL is not configured.\n' >> audit-report/report.md
           fi
 
-          gh issue list \
+          MARKER="$AUDIT_FINDING_KEY" gh issue list \
             --state all \
             --label "$AUDIT_LABEL" \
             --limit 100 \
             --json title,body \
-            --jq --arg marker "$AUDIT_FINDING_KEY" \
-            '[.[] | select(.title | contains($marker) or (.body // "") | contains($marker))] | length' \
+            --jq '[.[] | select((.title | contains(env.MARKER)) or ((.body // "") | contains(env.MARKER)))] | length' \
             > issue-count.txt
 
       - name: Create issue for new finding
