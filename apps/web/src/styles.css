@@ -494,6 +494,14 @@ a {
   min-height: 44px;
 }
 
+.date-grid .date-unavailable:disabled {
+  border-color: #b6c4bd;
+  background: #e8eeea;
+  color: #64736a;
+  opacity: 1;
+  text-decoration: line-through;
+}
+
 .booking-card button {
   background-color: #e8f0eb;
   color: #14594d;

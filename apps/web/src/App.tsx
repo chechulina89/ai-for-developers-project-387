@@ -637,10 +637,17 @@ function BookingPage() {
                   <Button
                     key={date.date}
                     type="button"
+                    className={
+                      date.slots.length === 0 ? 'date-unavailable' : undefined
+                    }
                     variant={selectedDate === date.date ? 'filled' : 'light'}
                     disabled={loadingAvailability || date.slots.length === 0}
                     aria-pressed={selectedDate === date.date}
-                    aria-label={formatDate(date.date)}
+                    aria-label={
+                      date.slots.length === 0
+                        ? `${formatDate(date.date)}, нет свободного времени`
+                        : formatDate(date.date)
+                    }
                     onClick={() => {
                       setSelectedDate(date.date);
                       setSelectedSlot(null);
