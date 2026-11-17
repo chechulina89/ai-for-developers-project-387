@@ -24,6 +24,7 @@ jobs:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
+      VAR_GEMINI_API_KEY: ${{ vars.GEMINI_API_KEY }}
     # Only trusted humans can invoke the agent:
     # - bot comments are ignored
     # - only OWNER, MEMBER or COLLABORATOR associations pass, so untrusted
@@ -41,7 +42,7 @@ jobs:
 
       - name: Check model key presence
         run: |
-          for name in GEMINI_API_KEY GOOGLE_API_KEY GOOGLE_GENERATIVE_AI_API_KEY; do
+          for name in GEMINI_API_KEY GOOGLE_API_KEY GOOGLE_GENERATIVE_AI_API_KEY VAR_GEMINI_API_KEY; do
             value="${!name}"
             if [ -n "$value" ]; then
               echo "$name present (length ${#value})"
