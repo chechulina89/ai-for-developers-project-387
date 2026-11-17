@@ -11,7 +11,11 @@ permissions:
   id-token: write
 
 concurrency:
-  group: opencode-${{ github.event.issue.number || github.event.pull_request.number }}
+  # The agent's own reply is a new issue_comment/pull_request_review_comment
+  # event from a bot. Without the author type in the group, that no-op bot
+  # run (skipped by the job condition) would cancel the still-running real
+  # run that produced the reply.
+  group: opencode-${{ github.event.issue.number || github.event.pull_request.number }}-${{ github.event.comment.user.type }}
   cancel-in-progress: true
 
 jobs:
