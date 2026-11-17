@@ -40,6 +40,6 @@ jobs:
       - name: Run opencode
         uses: anomalyco/opencode/github@latest
         with:
-          model: groq/llama-3.3-70b-versatile
+          model: groq/openai/gpt-oss-120b
           mentions: /oc,/opencode
           share: false

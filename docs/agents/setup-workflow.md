@@ -16,7 +16,7 @@ comment command in an issue.
 | Setting     | Value                                                  |
 | ----------- | ------------------------------------------------------ |
 | Event       | `issue_comment`, `types: [created]` only               |
-| Model       | `groq/llama-3.3-70b-versatile` (`GROQ_API_KEY` secret) |
+| Model       | `groq/openai/gpt-oss-120b` (`GROQ_API_KEY` secret) |
 | `mentions`  | `/oc,/opencode`                                        |
 | `share`     | `false` (sessions are not published)                   |
 | Permissions | `contents: read`, `id-token: write`                    |
@@ -51,7 +51,7 @@ record the reason here and in `README.md`.
 
 ### 2. Model key
 
-The configured model `groq/llama-3.3-70b-versatile` reads the provider key
+The configured model `groq/openai/gpt-oss-120b` reads the provider key
 from the `GROQ_API_KEY` environment variable, supplied from a repository
 secret:
 

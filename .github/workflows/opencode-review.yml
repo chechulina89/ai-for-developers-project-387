@@ -52,7 +52,7 @@ jobs:
       - name: Run opencode review
         uses: anomalyco/opencode/github@latest
         with:
-          model: groq/llama-3.3-70b-versatile
+          model: groq/openai/gpt-oss-120b
           share: false
           prompt: |
             Ты — независимый ревьюер PR #${{ github.event.pull_request.number }}

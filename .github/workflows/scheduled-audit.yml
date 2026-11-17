@@ -105,7 +105,7 @@ jobs:
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         with:
-          model: groq/llama-3.3-70b-versatile
+          model: groq/openai/gpt-oss-120b
           share: false
           prompt: |
             Ты — агент периодического аудита этого репозитория (сервис

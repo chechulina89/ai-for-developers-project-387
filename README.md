@@ -32,7 +32,7 @@ comments. The workflow lives in
 the `anomalyco/opencode/github` action.
 
 - **Event:** `issue_comment` with `types: [created]` only.
-- **Model:** `groq/llama-3.3-70b-versatile`, read from the `GROQ_API_KEY`
+- **Model:** `groq/openai/gpt-oss-120b`, read from the `GROQ_API_KEY`
   repository secret (a free [Groq Cloud](https://console.groq.com/keys) key;
   no card needed, the free tier allows thousands of requests per day).
   Earlier setups were abandoned, all recorded here as deliberate decisions:
@@ -41,7 +41,10 @@ the `anomalyco/opencode/github` action.
   sessions (`FreeUsageLimitError`, reset at UTC midnight); a Google AI
   Studio key for `google/gemini-2.5-flash` was rejected with account-level
   `403 ACCESS_DENIED`; OpenRouter's no-purchase free tier (~50 requests/day)
-  was exhausted by a handful of agent sessions (`402 Insufficient credits`).
+  was exhausted by a handful of agent sessions (`402 Insufficient credits`);
+  Groq's `llama-3.3-70b-versatile` was moved to the Enterprise plan
+  (`Model not found` on the free key), so the free-plan production model
+  `openai/gpt-oss-120b` is used instead.
   The same model and secret are used by all four agent workflows; the key
   reaches the composite action via job-level `env` (step-level `env` on a
   `uses:` step is not propagated).
