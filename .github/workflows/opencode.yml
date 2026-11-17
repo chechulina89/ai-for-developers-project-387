@@ -36,6 +36,6 @@ jobs:
       - name: Run opencode
         uses: anomalyco/opencode/github@latest
         with:
-          model: opencode/deepseek-v4.1-flash-free
+          model: opencode/glm-5.3-flash-free
           mentions: /oc,/opencode
           share: false
