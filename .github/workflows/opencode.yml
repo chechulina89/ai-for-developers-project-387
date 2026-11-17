@@ -18,6 +18,10 @@ jobs:
   opencode:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # Job-level env: composite action steps inherit it (step-level env on a
+    # uses: step is not propagated into a composite action).
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
     # Only trusted humans can invoke the agent:
     # - bot comments are ignored
     # - only OWNER, MEMBER or COLLABORATOR associations pass, so untrusted
@@ -35,8 +39,6 @@ jobs:
 
       - name: Run opencode
         uses: anomalyco/opencode/github@latest
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         with:
           model: google/gemini-2.5-flash
           mentions: /oc,/opencode

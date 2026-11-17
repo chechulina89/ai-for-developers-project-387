@@ -26,8 +26,11 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # Job-level env: composite action steps inherit it (step-level env on a
+    # uses: step is not propagated into a composite action).
     env:
       APP_URL: ${{ vars.APP_URL }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -101,8 +104,6 @@ jobs:
         # the agent only adds a readable summary of the same data.
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         with:
           model: google/gemini-2.5-flash
           share: false

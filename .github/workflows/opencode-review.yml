@@ -23,6 +23,10 @@ jobs:
   review:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Job-level env: composite action steps inherit it (step-level env on a
+    # uses: step is not propagated into a composite action).
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
     # Independent review runs only for PRs from trusted humans; bot PRs are
     # ignored.
     if: |
@@ -47,8 +51,6 @@ jobs:
 
       - name: Run opencode review
         uses: anomalyco/opencode/github@latest
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         with:
           model: google/gemini-2.5-flash
           share: false

@@ -16,6 +16,10 @@ jobs:
   triage:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Job-level env: composite action steps inherit it (step-level env on a
+    # uses: step is not propagated into a composite action).
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
     # Triage runs only for new requests from trusted humans.
     # Tickets prepared by the to-spec/to-tickets skills are opened with the
     # ready-for-agent label and are skipped (label is present at `opened`).
@@ -32,8 +36,6 @@ jobs:
 
       - name: Run opencode triage
         uses: anomalyco/opencode/github@latest
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         with:
           model: google/gemini-2.5-flash
           share: false
