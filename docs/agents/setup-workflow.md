@@ -13,16 +13,16 @@ comment command in an issue.
 
 ### Configuration summary
 
-| Setting     | Value                                                  |
-| ----------- | ------------------------------------------------------ |
-| Event       | `issue_comment`, `types: [created]` only               |
-| Model       | `groq/openai/gpt-oss-120b` (`GROQ_API_KEY` secret)     |
-| `mentions`  | `/oc,/opencode`                                        |
-| `share`     | `false` (sessions are not published)                   |
-| Permissions | `contents: read`, `id-token: write`                    |
-| Timeout     | 30 minutes                                             |
-| Concurrency | one run per issue, previous run is cancelled           |
-| Auth        | OIDC token exchange with the opencode-agent GitHub App |
+| Setting     | Value                                                                         |
+| ----------- | ----------------------------------------------------------------------------- |
+| Event       | `issue_comment`, `types: [created]` only                                      |
+| Model       | `openrouter/nvidia/nemotron-3.5-lightning:free` (`OPENROUTER_API_KEY` secret) |
+| `mentions`  | `/oc,/opencode`                                                               |
+| `share`     | `false` (sessions are not published)                                          |
+| Permissions | `contents: read`, `id-token: write`                                           |
+| Timeout     | 30 minutes                                                                    |
+| Concurrency | one run per issue, previous run is cancelled                                  |
+| Auth        | OIDC token exchange with the opencode-agent GitHub App                        |
 
 ### Access control
 
@@ -51,14 +51,14 @@ record the reason here and in `README.md`.
 
 ### 2. Model key
 
-The configured model `groq/openai/gpt-oss-120b` reads the provider key
-from the `GROQ_API_KEY` environment variable, supplied from a repository
+The configured model `openrouter/nvidia/nemotron-3.5-lightning:free` reads the provider key
+from the `OPENROUTER_API_KEY` environment variable, supplied from a repository
 secret:
 
 1. Create a free key at [Groq Cloud → API Keys](https://console.groq.com/keys)
    (no card required; the free tier allows thousands of requests per day).
 2. Settings → Secrets and variables → Actions → New repository secret:
-   - **Name:** `GROQ_API_KEY`
+   - **Name:** `OPENROUTER_API_KEY`
    - **Value:** the created key
 
 All four agent workflows (`opencode`, `opencode-triage`, `opencode-review`,

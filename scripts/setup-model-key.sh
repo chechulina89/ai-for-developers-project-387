@@ -202,41 +202,41 @@ run_wizard() {
 
 TOTAL_STAGES=3
 
-banner "Groq API key for GitHub Actions"
+banner "OpenRouter API key for GitHub Actions"
 
-# ── Stage 1: create a free Groq key ───────────────────────────────────────
-stage "Groq Cloud: create the API key"
+# ── Stage 1: create a free OpenRouter key ─────────────────────────────────
+stage "OpenRouter: create the API key"
 say "The agent workflows use the free model"
-say "groq/openai/gpt-oss-120b via Groq."
-open_url "https://console.groq.com/keys"
+say "openrouter/nvidia/nemotron-3.5-lightning:free via OpenRouter."
+open_url "https://openrouter.ai/keys"
 step "Sign in (Google or GitHub) if asked — no card is required."
-step "Click 'Create API Key', give it any name."
-step "Copy the key. It starts with 'gsk_'."
-ask_secret GROQ_API_KEY "Paste the Groq API key:"
-if [[ "$GROQ_API_KEY" != gsk_* ]]; then
-  warn "the key does not start with 'gsk_' — double-check you copied the"
-  warn "Groq API key."
+step "Click 'Create Key', give it any name."
+step "Copy the key. It starts with 'sk-or-'."
+ask_secret OPENROUTER_API_KEY "Paste the OpenRouter API key:"
+if [[ "$OPENROUTER_API_KEY" != sk-or-* ]]; then
+  warn "the key does not start with 'sk-or-' — double-check you copied the"
+  warn "OpenRouter API key."
   confirm "Use this value anyway?" || exit 1
 fi
-say "Key captured: ${#GROQ_API_KEY} characters, starts with ${GROQ_API_KEY:0:6}…"
+say "Key captured: ${#OPENROUTER_API_KEY} characters, starts with ${OPENROUTER_API_KEY:0:6}…"
 
-# ── Stage 2: store it as the GROQ_API_KEY repository secret ─────────
-stage "GitHub: store the key as the GROQ_API_KEY secret"
-set_secret GROQ_API_KEY "$GROQ_API_KEY"
-if [[ " ${WRITTEN_SECRET[*]-} " != *" GROQ_API_KEY "* ]]; then
+# ── Stage 2: store it as the OPENROUTER_API_KEY repository secret ─────────
+stage "GitHub: store the key as the OPENROUTER_API_KEY secret"
+set_secret OPENROUTER_API_KEY "$OPENROUTER_API_KEY"
+if [[ " ${WRITTEN_SECRET[*]-} " != *" OPENROUTER_API_KEY "* ]]; then
   say "Automatic upload failed (the current gh token cannot write secrets),"
   say "so do it in the browser:"
   open_url "https://github.com/chechulina89/ai-for-developers-project-387/settings/secrets/actions"
   step "Stay on the 'Secrets' tab (not 'Variables')."
-  step "If GROQ_API_KEY already exists, click its pencil / 'Update'"
+  step "If OPENROUTER_API_KEY already exists, click its pencil / 'Update'"
   step "button; otherwise click 'New repository secret'."
-  step "Name: GROQ_API_KEY   Secret: paste the key, with no spaces or"
+  step "Name: OPENROUTER_API_KEY   Secret: paste the key, with no spaces or"
   step "line breaks around it. Save with 'Add secret' / 'Update secret'."
   note "The secret must be listed under 'Repository secrets' on the Actions"
   note "page — 'Environment secrets' and the Codespaces/Dependabot tabs do"
   note "not reach these workflows."
 fi
-confirm "Is GROQ_API_KEY now listed under Repository secrets?" || exit 1
+confirm "Is OPENROUTER_API_KEY now listed under Repository secrets?" || exit 1
 
 # ── Stage 3: fire a probe run so the fix can be verified ──────────────────
 stage "Verify: trigger a probe agent run"
