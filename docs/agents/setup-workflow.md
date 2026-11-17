@@ -13,16 +13,16 @@ comment command in an issue.
 
 ### Configuration summary
 
-| Setting     | Value                                                          |
-| ----------- | -------------------------------------------------------------- |
-| Event       | `issue_comment`, `types: [created]` only                       |
-| Model       | `google/gemini-2.5-flash` (key in `GEMINI_API_KEY` secret)     |
-| `mentions`  | `/oc,/opencode`                                        |
-| `share`     | `false` (sessions are not published)                   |
-| Permissions | `contents: read`, `id-token: write`                    |
-| Timeout     | 30 minutes                                             |
-| Concurrency | one run per issue, previous run is cancelled           |
-| Auth        | OIDC token exchange with the opencode-agent GitHub App |
+| Setting     | Value                                                      |
+| ----------- | ---------------------------------------------------------- |
+| Event       | `issue_comment`, `types: [created]` only                   |
+| Model       | `google/gemini-2.5-flash` (key in `GEMINI_API_KEY` secret) |
+| `mentions`  | `/oc,/opencode`                                            |
+| `share`     | `false` (sessions are not published)                       |
+| Permissions | `contents: read`, `id-token: write`                        |
+| Timeout     | 30 minutes                                                 |
+| Concurrency | one run per issue, previous run is cancelled               |
+| Auth        | OIDC token exchange with the opencode-agent GitHub App     |
 
 ### Access control
 
