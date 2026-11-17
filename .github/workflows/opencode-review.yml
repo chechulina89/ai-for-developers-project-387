@@ -26,7 +26,7 @@ jobs:
     # Job-level env: composite action steps inherit it (step-level env on a
     # uses: step is not propagated into a composite action).
     env:
-      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
     # Independent review runs only for PRs from trusted humans; bot PRs are
     # ignored.
     if: |
@@ -52,7 +52,7 @@ jobs:
       - name: Run opencode review
         uses: anomalyco/opencode/github@latest
         with:
-          model: openrouter/nvidia/nemotron-3.5-lightning:free
+          model: groq/llama-3.3-70b-versatile
           share: false
           prompt: |
             Ты — независимый ревьюер PR #${{ github.event.pull_request.number }}

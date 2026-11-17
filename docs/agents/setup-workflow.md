@@ -13,16 +13,16 @@ comment command in an issue.
 
 ### Configuration summary
 
-| Setting     | Value                                                                         |
-| ----------- | ----------------------------------------------------------------------------- |
-| Event       | `issue_comment`, `types: [created]` only                                      |
-| Model       | `openrouter/nvidia/nemotron-3.5-lightning:free` (`OPENROUTER_API_KEY` secret) |
-| `mentions`  | `/oc,/opencode`                                                               |
-| `share`     | `false` (sessions are not published)                                          |
-| Permissions | `contents: read`, `id-token: write`                                           |
-| Timeout     | 30 minutes                                                                    |
-| Concurrency | one run per issue, previous run is cancelled                                  |
-| Auth        | OIDC token exchange with the opencode-agent GitHub App                        |
+| Setting     | Value                                                  |
+| ----------- | ------------------------------------------------------ |
+| Event       | `issue_comment`, `types: [created]` only               |
+| Model       | `groq/llama-3.3-70b-versatile` (`GROQ_API_KEY` secret) |
+| `mentions`  | `/oc,/opencode`                                        |
+| `share`     | `false` (sessions are not published)                   |
+| Permissions | `contents: read`, `id-token: write`                    |
+| Timeout     | 30 minutes                                             |
+| Concurrency | one run per issue, previous run is cancelled           |
+| Auth        | OIDC token exchange with the opencode-agent GitHub App |
 
 ### Access control
 
@@ -51,14 +51,14 @@ record the reason here and in `README.md`.
 
 ### 2. Model key
 
-The configured model `openrouter/nvidia/nemotron-3.5-lightning:free` reads
-the provider key from the `OPENROUTER_API_KEY` environment variable,
-supplied from a repository secret:
+The configured model `groq/llama-3.3-70b-versatile` reads the provider key
+from the `GROQ_API_KEY` environment variable, supplied from a repository
+secret:
 
-1. Create a free key at [OpenRouter → Keys](https://openrouter.ai/keys)
-   (no card required).
+1. Create a free key at [Groq Cloud → API Keys](https://console.groq.com/keys)
+   (no card required; the free tier allows thousands of requests per day).
 2. Settings → Secrets and variables → Actions → New repository secret:
-   - **Name:** `OPENROUTER_API_KEY`
+   - **Name:** `GROQ_API_KEY`
    - **Value:** the created key
 
 All four agent workflows (`opencode`, `opencode-triage`, `opencode-review`,
@@ -76,6 +76,9 @@ Earlier setups and why they were replaced:
   account-level `403 ACCESS_DENIED` from `generativelanguage.googleapis.com`
   (new-format `AQ.` keys; the project/account was denied the service), so it
   never produced a single answer.
+- `openrouter/nvidia/nemotron-3.5-lightning:free` worked for single
+  requests, but the no-purchase free tier is capped at ~50 requests/day
+  (`402 Insufficient credits`), which a few agent sessions exhaust.
 
 ### 3. Verify the run
 

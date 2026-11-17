@@ -21,7 +21,7 @@ jobs:
     # Job-level env: composite action steps inherit it (step-level env on a
     # uses: step is not propagated into a composite action).
     env:
-      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
     # Only trusted humans can invoke the agent:
     # - bot comments are ignored
     # - only OWNER, MEMBER or COLLABORATOR associations pass, so untrusted
@@ -37,18 +37,9 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Check model key presence
-        run: |
-          if [ -n "$OPENROUTER_API_KEY" ]; then
-            echo "OPENROUTER_API_KEY present (length ${#OPENROUTER_API_KEY})"
-          else
-            echo "OPENROUTER_API_KEY MISSING"
-            exit 1
-          fi
-
       - name: Run opencode
         uses: anomalyco/opencode/github@latest
         with:
-          model: openrouter/nvidia/nemotron-3.5-lightning:free
+          model: groq/llama-3.3-70b-versatile
           mentions: /oc,/opencode
           share: false
