@@ -13,16 +13,16 @@ comment command in an issue.
 
 ### Configuration summary
 
-| Setting     | Value                                                      |
-| ----------- | ---------------------------------------------------------- |
-| Event       | `issue_comment`, `types: [created]` only                   |
-| Model       | `google/gemini-2.5-flash` (key in `GEMINI_API_KEY` secret) |
-| `mentions`  | `/oc,/opencode`                                            |
-| `share`     | `false` (sessions are not published)                       |
-| Permissions | `contents: read`, `id-token: write`                        |
-| Timeout     | 30 minutes                                                 |
-| Concurrency | one run per issue, previous run is cancelled               |
-| Auth        | OIDC token exchange with the opencode-agent GitHub App     |
+| Setting     | Value                                                                         |
+| ----------- | ----------------------------------------------------------------------------- |
+| Event       | `issue_comment`, `types: [created]` only                                      |
+| Model       | `openrouter/nvidia/nemotron-3.5-lightning:free` (`OPENROUTER_API_KEY` secret) |
+| `mentions`  | `/oc,/opencode`                                                               |
+| `share`     | `false` (sessions are not published)                                          |
+| Permissions | `contents: read`, `id-token: write`                                           |
+| Timeout     | 30 minutes                                                                    |
+| Concurrency | one run per issue, previous run is cancelled                                  |
+| Auth        | OIDC token exchange with the opencode-agent GitHub App                        |
 
 ### Access control
 
@@ -51,22 +51,31 @@ record the reason here and in `README.md`.
 
 ### 2. Model key
 
-The configured model `google/gemini-2.5-flash` reads the provider key from
-the `GEMINI_API_KEY` environment variable, supplied from a repository secret:
+The configured model `openrouter/nvidia/nemotron-3.5-lightning:free` reads
+the provider key from the `OPENROUTER_API_KEY` environment variable,
+supplied from a repository secret:
 
-1. Create a free API key in [Google AI Studio](https://aistudio.google.com/apikey).
+1. Create a free key at [OpenRouter → Keys](https://openrouter.ai/keys)
+   (no card required).
 2. Settings → Secrets and variables → Actions → New repository secret:
-   - **Name:** `GEMINI_API_KEY`
+   - **Name:** `OPENROUTER_API_KEY`
    - **Value:** the created key
 
 All four agent workflows (`opencode`, `opencode-triage`, `opencode-review`,
-`scheduled-audit`) use the same model and secret.
+`scheduled-audit`) use the same model and secret. The key is passed as
+job-level `env`: step-level `env` on a `uses:` step is not propagated into
+the composite opencode action.
 
-The earlier setup used the free opencode Zen models
-(`opencode/deepseek-v4.1-flash-free`, then `opencode/glm-5.3-flash-free`),
-which need no key. That was abandoned because the daily free quota is
-exhausted by one or two agent sessions (`FreeUsageLimitError`, reset at UTC
-midnight), which made triage and review runs unreliable.
+Earlier setups and why they were replaced:
+
+- Free opencode Zen models (`opencode/deepseek-v4.1-flash-free`, then
+  `opencode/glm-5.3-flash-free`) need no key, but the daily free quota is
+  exhausted by one or two agent sessions (`FreeUsageLimitError`, reset at
+  UTC midnight), which made triage and review runs unreliable.
+- `google/gemini-2.5-flash` with a Google AI Studio key failed with
+  account-level `403 ACCESS_DENIED` from `generativelanguage.googleapis.com`
+  (new-format `AQ.` keys; the project/account was denied the service), so it
+  never produced a single answer.
 
 ### 3. Verify the run
 
