@@ -37,6 +37,15 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
+      - name: Check model key presence
+        run: |
+          if [ -n "$GEMINI_API_KEY" ]; then
+            echo "GEMINI_API_KEY present (length ${#GEMINI_API_KEY})"
+          else
+            echo "GEMINI_API_KEY MISSING"
+            exit 1
+          fi
+
       - name: Run opencode
         uses: anomalyco/opencode/github@latest
         with:
