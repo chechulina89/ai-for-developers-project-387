@@ -33,7 +33,7 @@ jobs:
       - name: Run opencode triage
         uses: anomalyco/opencode/github@latest
         with:
-          model: opencode/deepseek-v4.1-flash-free
+          model: opencode/glm-5.3-flash-free
           share: false
           prompt: |
             Триаж нового обращения #${{ github.event.issue.number }} этого
