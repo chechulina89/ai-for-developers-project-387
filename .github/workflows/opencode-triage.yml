@@ -33,7 +33,9 @@ jobs:
       - name: Run opencode triage
         uses: anomalyco/opencode/github@latest
         with:
-          model: opencode/glm-5.3-flash-free
+          model: google/gemini-2.5-flash
+          env:
+            GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           share: false
           prompt: |
             Триаж нового обращения #${{ github.event.issue.number }} этого

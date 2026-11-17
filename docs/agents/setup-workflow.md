@@ -13,10 +13,10 @@ comment command in an issue.
 
 ### Configuration summary
 
-| Setting     | Value                                                  |
-| ----------- | ------------------------------------------------------ |
-| Event       | `issue_comment`, `types: [created]` only               |
-| Model       | `opencode/deepseek-v4.1-flash-free` (free, no API key) |
+| Setting     | Value                                                          |
+| ----------- | -------------------------------------------------------------- |
+| Event       | `issue_comment`, `types: [created]` only                       |
+| Model       | `google/gemini-2.5-flash` (key in `GEMINI_API_KEY` secret)     |
 | `mentions`  | `/oc,/opencode`                                        |
 | `share`     | `false` (sessions are not published)                   |
 | Permissions | `contents: read`, `id-token: write`                    |
@@ -51,19 +51,22 @@ record the reason here and in `README.md`.
 
 ### 2. Model key
 
-The configured model `opencode/deepseek-v4.1-flash-free` is free and needs
-**no API key**, so no GitHub secret is required. It was chosen for speed:
-the slower free `opencode/big-pickle` model could not finish multi-step
-publishing tasks within the job timeout. This is a deliberate deviation from
-the default paid-model setup.
+The configured model `google/gemini-2.5-flash` reads the provider key from
+the `GEMINI_API_KEY` environment variable, supplied from a repository secret:
 
-To switch to a paid model later (for example `anthropic/claude-sonnet-5-5`):
+1. Create a free API key in [Google AI Studio](https://aistudio.google.com/apikey).
+2. Settings → Secrets and variables → Actions → New repository secret:
+   - **Name:** `GEMINI_API_KEY`
+   - **Value:** the created key
 
-1. Settings → Secrets and variables → Actions → New repository secret:
-   - **Name:** `ANTHROPIC_API_KEY`
-   - **Value:** the provider API key
-2. Change `model` in `.github/workflows/opencode.yml` and add the secret to
-   the step's `env`.
+All four agent workflows (`opencode`, `opencode-triage`, `opencode-review`,
+`scheduled-audit`) use the same model and secret.
+
+The earlier setup used the free opencode Zen models
+(`opencode/deepseek-v4.1-flash-free`, then `opencode/glm-5.3-flash-free`),
+which need no key. That was abandoned because the daily free quota is
+exhausted by one or two agent sessions (`FreeUsageLimitError`, reset at UTC
+midnight), which made triage and review runs unreliable.
 
 ### 3. Verify the run
 

@@ -32,16 +32,14 @@ comments. The workflow lives in
 the `anomalyco/opencode/github` action.
 
 - **Event:** `issue_comment` with `types: [created]` only.
-- **Model:** `opencode/deepseek-v4.1-flash-free` — a free model from the
-  opencode Zen provider with tool calling, chosen for speed: multi-step tasks
-  (publishing specs and tickets) must fit the job timeout. The slower free
-  `opencode/big-pickle` model was tried first and could not finish
-  publication tasks within 30 minutes. **Decision:** no paid model key is
-  required, so no model secret is stored in GitHub Secrets; this is a
-  conscious deviation from the default setup, recorded here. To switch to a
-  paid model later (for example `anthropic/claude-sonnet-5-5`), set the
-  provider's key as a repository secret (for example `ANTHROPIC_API_KEY`) and
-  update `model` in the workflow.
+- **Model:** `google/gemini-2.5-flash`, read from the `GEMINI_API_KEY`
+  repository secret (a free [Google AI Studio](https://aistudio.google.com/apikey)
+  key). The earlier keyless setup on free opencode Zen models
+  (`deepseek-v4.1-flash-free`, then `glm-5.3-flash-free`) was abandoned: the
+  daily free quota is exhausted by one or two agent sessions
+  (`FreeUsageLimitError`, reset at UTC midnight), so triage and review runs
+  were cancelled before the model answered. The same model and secret are
+  used by all four agent workflows.
 - **Purpose:** answer questions about issues, triage them, and propose fixes
   from a comment command.
 - **Results:** the agent replies as an issue comment and links its workflow
