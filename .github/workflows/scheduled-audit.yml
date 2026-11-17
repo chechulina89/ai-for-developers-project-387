@@ -30,7 +30,7 @@ jobs:
     # uses: step is not propagated into a composite action).
     env:
       APP_URL: ${{ vars.APP_URL }}
-      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -107,7 +107,7 @@ jobs:
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         with:
-          model: openrouter/nvidia/nemotron-3.5-lightning:free
+          model: cerebras/gpt-oss-120b
           share: false
           prompt: |
             Ты — агент периодического аудита этого репозитория (сервис

@@ -25,7 +25,7 @@ jobs:
     # Job-level env: composite action steps inherit it (step-level env on a
     # uses: step is not propagated into a composite action).
     env:
-      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
     # Only trusted humans can invoke the agent:
     # - bot comments are ignored
     # - only OWNER, MEMBER or COLLABORATOR associations pass, so untrusted
@@ -44,6 +44,6 @@ jobs:
       - name: Run opencode
         uses: anomalyco/opencode/github@latest
         with:
-          model: openrouter/nvidia/nemotron-3.5-lightning:free
+          model: cerebras/gpt-oss-120b
           mentions: /oc,/opencode
           share: false
