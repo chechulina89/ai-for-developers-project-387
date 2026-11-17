@@ -16,7 +16,7 @@ comment command in an issue.
 | Setting     | Value                                                  |
 | ----------- | ------------------------------------------------------ |
 | Event       | `issue_comment`, `types: [created]` only               |
-| Model       | `groq/openai/gpt-oss-120b` (`GROQ_API_KEY` secret) |
+| Model       | `groq/openai/gpt-oss-120b` (`GROQ_API_KEY` secret)     |
 | `mentions`  | `/oc,/opencode`                                        |
 | `share`     | `false` (sessions are not published)                   |
 | Permissions | `contents: read`, `id-token: write`                    |
