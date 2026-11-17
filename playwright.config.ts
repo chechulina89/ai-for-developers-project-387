@@ -10,6 +10,9 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:4173',
     browserName: 'chromium',
     headless: true,
+    // CI artifacts must include observable evidence for every run, so traces
+    // are always recorded there; locally keep them only for failures.
+    trace: process.env.CI ? 'on' : 'retain-on-failure',
   },
   webServer: [
     {

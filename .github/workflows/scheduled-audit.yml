@@ -101,7 +101,9 @@ jobs:
       - name: Agent reviews the audit report
         # The audit itself never fails on model quota exhaustion: the
         # deterministic report and deduplication above are the deliverable,
-        # the agent only adds a readable summary of the same data.
+        # the agent only adds a readable summary of the same data. The agent
+        # appends its summary to report.md, so its output stays accessible in
+        # the uploaded artifact even though sessions are not shared.
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         with:
@@ -112,13 +114,19 @@ jobs:
             записи на встречи). Не исследуй код без необходимости.
 
             1. Прочитай отчёт audit-report/report.md.
-            2. Если в отчёте есть строка «Created audit issue: <url>» —
+            2. Допиши в конец audit-report/report.md раздел «## Agent summary»:
+               2-3 предложения — что нашёл аудит, создана ли задача или
+               сработала защита от дублей, есть ли warning про APP_URL. Этот
+               раздел обязателен: он — твой видимый результат.
+            3. Если в отчёте есть строка «Created audit issue: <url>» —
                прокомментируй этот issue через gh: 2-3 предложения, что это
                учебная находка, как её проверить и когда закрыть.
-            3. Если есть строка «Existing audit issue found» — ничего не
-               комментируй, дубликаты запрещены.
-            4. Если в отчёте warning про APP_URL — упомяни в комментарии,
-               что переменную нужно задать в настройках репозитория.
+            4. Если есть строка «Existing audit issue found» — issue не
+               комментируй, дубликаты запрещены; подтверждение дедупликации
+               запиши в «## Agent summary».
+            5. Если в отчёте warning про APP_URL — упомяни в комментарии
+               (п. 3) или в «## Agent summary» (п. 4), что переменную нужно
+               задать в настройках репозитория.
 
       - name: Save audit output
         run: cat audit-report/report.md

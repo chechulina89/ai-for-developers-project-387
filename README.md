@@ -103,6 +103,9 @@ summary comment.
   previous run). Same OIDC permissions as the agent workflow
   (`contents: read`, `id-token: write`, checkout with
   `persist-credentials: false`).
+- **Agent vs script:** the label and the summary comment are the agent's own
+  output; the trigger condition, the ready-ticket skip, and the concurrency
+  limit are plain workflow logic that runs no model.
 
 ### Independent pull request review
 
@@ -119,13 +122,32 @@ line-level findings without changing the branch.
 - **Stale review cancellation:** a new commit cancels the review for the
   previous head of that PR; every review has a 15-minute timeout.
 - **Run budget before the model:** [`scripts/review-budget.mjs`](./scripts/review-budget.mjs)
-  checks the number of earlier workflow runs for the PR branch before the
-  model step. At the `MAX_REVIEW_RUNS` limit (currently three), it refuses the
-  review, comments with the exact head SHA and Actions-log URL, and never
-  calls the model.
+  counts the review attempts already spent on the PR branch before the model
+  step. A manual **Re-run** in the Actions UI keeps the run id and bumps its
+  attempt number, and the script counts attempts (`gh run list --json
+databaseId,attempt`), so a re-run consumes budget too. At the
+  `MAX_REVIEW_RUNS` limit (currently three) it refuses the review, comments
+  with the exact head SHA and Actions-log URL, and never calls the model.
+- **Agent vs script:** the budget check and the refusal comment are plain
+  script steps; only the verdict and the line-level findings are produced by
+  the agent.
 - **PR evidence:** [the PR template](./.github/pull_request_template.md)
   requires issue/specification links, human approval, checks, an impact-based
   risk rationale, and a rollback procedure.
+
+### Browser verification of the calendar
+
+[`.github/workflows/browser-verification.yml`](./.github/workflows/browser-verification.yml)
+runs the booking e2e suite in Chromium on every pull request, checked out at
+the exact head SHA. This is a **plain script job, no agent**: the observable
+evidence is the uploaded artifact, not a model output.
+
+- **Artifact:** `browser-verification-<head_sha>` contains
+  `browser-verification.txt` (the verified head SHA and the test outcome) and
+  the Playwright `test-results/` directory. In CI the Playwright config
+  records a `trace.zip` for every test (`trace: 'on'` when `CI` is set), so
+  each artifact includes a trace even for a green run; locally traces are
+  kept only for failures.
 
 ### Scheduled audit
 
@@ -146,6 +168,16 @@ by `concurrency: scheduled-audit`. Permissions are minimal for what it does:
 - **Deduplication:** every finding carries a stable key; before creating an
   issue the workflow lists issues with the `scheduled-audit` label and skips
   creation when the key already exists in a title or body.
+- **Agent step:** the `Agent reviews the audit report` step reads the report,
+  appends an `## Agent summary` section to `audit-report/report.md` (so the
+  agent's output stays accessible in the uploaded artifact even with
+  `share: false`), and comments on the finding issue only when a new issue
+  was created. The step is `continue-on-error`: model quota problems never
+  fail the audit, because the report and deduplication are deterministic
+  script steps.
+- **Agent vs script:** report collection, deduplication, and issue creation
+  are plain script steps; only the `## Agent summary` section and the
+  optional issue comment are agent output.
 - **Verified runs:**
   [43842291470](https://github.com/chechulina89/ai-for-developers-project-387/actions/runs/43842291470)
   created issue #13 (demo finding); repeat run
