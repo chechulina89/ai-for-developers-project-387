@@ -19,7 +19,7 @@ jobs:
     # Job-level env: composite action steps inherit it (step-level env on a
     # uses: step is not propagated into a composite action).
     env:
-      CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     # Triage runs only for new requests from trusted humans.
     # Tickets prepared by the to-spec/to-tickets skills are opened with the
     # ready-for-agent label and are skipped (label is present at `opened`).
@@ -37,7 +37,7 @@ jobs:
       - name: Run opencode triage
         uses: anomalyco/opencode/github@latest
         with:
-          model: cerebras/gpt-oss-120b
+          model: openrouter/nvidia/nemotron-3.5-lightning:free
           share: false
           prompt: |
             Триаж нового обращения #${{ github.event.issue.number }} этого

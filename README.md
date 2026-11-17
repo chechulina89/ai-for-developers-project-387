@@ -32,23 +32,23 @@ comments. The workflow lives in
 the `anomalyco/opencode/github` action.
 
 - **Event:** `issue_comment` with `types: [created]` only.
-- **Model:** `cerebras/gpt-oss-120b`, read from the `CEREBRAS_API_KEY`
-  repository secret (a free [Cerebras Cloud](https://cloud.cerebras.ai)
-  key; no card needed, the free tier allows ~60K tokens per minute and ~1M
-  tokens per day — enough for agent prompts and the whole demo).
+- **Model:** `openrouter/nvidia/nemotron-3.5-lightning:free`, read from
+  the `OPENROUTER_API_KEY` repository secret (a free
+  [OpenRouter](https://openrouter.ai/keys) key; no card needed, the free
+  tier is ~50 requests/day and resets at UTC midnight — enough for the
+  demo when probe runs stay rare).
   Earlier setups were abandoned, all recorded here as deliberate decisions:
   free opencode Zen models (`deepseek-v4.1-flash-free`,
   `glm-5.3-flash-free`) exhaust their daily quota in one or two agent
   sessions (`FreeUsageLimitError`, reset at UTC midnight); a Google AI
   Studio key for `google/gemini-2.5-flash` was rejected with account-level
-  `403 ACCESS_DENIED`; OpenRouter's no-purchase free tier (~50 requests/day)
-  was exhausted by a handful of agent sessions (`402 Insufficient credits`)
-  and the daily quota did not reset on schedule; Groq's
-  `llama-3.3-70b-versatile` was moved to the Enterprise plan (`Model not
-found` on the free key), and the free-plan replacement
-  `openai/gpt-oss-120b` caps at 8000 TPM — a single agent request with
-  tools and context is ~25K tokens (`Request too large`), so Groq's free
-  tier cannot serve agent prompts at all.
+  `403 ACCESS_DENIED`; Groq's `llama-3.3-70b-versatile` was moved to the
+  Enterprise plan (`Model not found` on the free key), and the free-plan
+  replacement `openai/gpt-oss-120b` caps at 8000 TPM — a single agent
+  request with tools and context is ~25K tokens (`Request too large`), so
+  Groq's free tier cannot serve agent prompts at all; Cerebras Cloud
+  ended its no-card free tier in July 2026 (a payment method is now
+  required even for the $5 trial credit).
   The same model and secret are used by all four agent workflows; the key
   reaches the composite action via job-level `env` (step-level `env` on a
   `uses:` step is not propagated).

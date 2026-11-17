@@ -13,16 +13,16 @@ comment command in an issue.
 
 ### Configuration summary
 
-| Setting     | Value                                                  |
-| ----------- | ------------------------------------------------------ |
-| Event       | `issue_comment`, `types: [created]` only               |
-| Model       | `cerebras/gpt-oss-120b` (`CEREBRAS_API_KEY` secret)    |
-| `mentions`  | `/oc,/opencode`                                        |
-| `share`     | `false` (sessions are not published)                   |
-| Permissions | `contents: read`, `id-token: write`                    |
-| Timeout     | 30 minutes                                             |
-| Concurrency | one run per issue, previous run is cancelled           |
-| Auth        | OIDC token exchange with the opencode-agent GitHub App |
+| Setting     | Value                                                                         |
+| ----------- | ----------------------------------------------------------------------------- |
+| Event       | `issue_comment`, `types: [created]` only                                      |
+| Model       | `openrouter/nvidia/nemotron-3.5-lightning:free` (`OPENROUTER_API_KEY` secret) |
+| `mentions`  | `/oc,/opencode`                                                               |
+| `share`     | `false` (sessions are not published)                                          |
+| Permissions | `contents: read`, `id-token: write`                                           |
+| Timeout     | 30 minutes                                                                    |
+| Concurrency | one run per issue, previous run is cancelled                                  |
+| Auth        | OIDC token exchange with the opencode-agent GitHub App                        |
 
 ### Access control
 
@@ -51,16 +51,16 @@ record the reason here and in `README.md`.
 
 ### 2. Model key
 
-The configured model `cerebras/gpt-oss-120b` reads the provider key
-from the `CEREBRAS_API_KEY` environment variable, supplied from a repository
+The configured model `openrouter/nvidia/nemotron-3.5-lightning:free` reads the provider key
+from the `OPENROUTER_API_KEY` environment variable, supplied from a repository
 secret:
 
-1. Create a free key at [Cerebras Cloud](https://cloud.cerebras.ai) → API
-   Keys (email or Google sign-up; no card required; the free tier allows
-   ~60K tokens/minute and ~1M tokens/day).
+1. Create a free key at [OpenRouter → Keys](https://openrouter.ai/keys)
+   (Google or GitHub sign-in; no card required; the free tier is ~50
+   requests/day, resetting at UTC midnight).
 2. Settings → Secrets and variables → Actions → New repository secret:
-   - **Name:** `CEREBRAS_API_KEY`
-   - **Value:** the created key (starts with `csk-`)
+   - **Name:** `OPENROUTER_API_KEY`
+   - **Value:** the created key (starts with `sk-or-`)
 
 All four agent workflows (`opencode`, `opencode-triage`, `opencode-review`,
 `scheduled-audit`) use the same model and secret. The key is passed as
@@ -77,14 +77,16 @@ Earlier setups and why they were replaced:
   account-level `403 ACCESS_DENIED` from `generativelanguage.googleapis.com`
   (new-format `AQ.` keys; the project/account was denied the service), so it
   never produced a single answer.
-- `openrouter/nvidia/nemotron-3.5-lightning:free` worked for single
-  requests, but the no-purchase free tier is capped at ~50 requests/day
-  (`402 Insufficient credits`), which a few agent sessions exhaust, and the
-  daily quota did not reset on schedule.
+- OpenRouter free tier note: the no-purchase tier is capped at ~50
+  requests/day (`402 Insufficient credits`), which a few agent sessions
+  exhaust — keep probe runs rare and expect the quota to reset at UTC
+  midnight.
 - Groq's free plan: `llama-3.3-70b-versatile` moved to Enterprise (`Model
 not found`); the free replacement `groq/openai/gpt-oss-120b` caps at
   8000 TPM while one agent request with tools and context is ~25K tokens
   (`Request too large`), so the Groq free tier cannot serve agent prompts.
+- Cerebras Cloud ended its no-card free tier in July 2026: a payment
+  method is required even to activate the $5 trial credit.
 
 ### 3. Verify the run
 

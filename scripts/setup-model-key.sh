@@ -202,41 +202,41 @@ run_wizard() {
 
 TOTAL_STAGES=3
 
-banner "Cerebras API key for GitHub Actions"
+banner "OpenRouter API key for GitHub Actions"
 
-# ── Stage 1: create a free Cerebras key ───────────────────────────────────
-stage "Cerebras Cloud: create the API key"
+# ── Stage 1: create a free OpenRouter key ─────────────────────────────────
+stage "OpenRouter: create the API key"
 say "The agent workflows use the free model"
-say "cerebras/gpt-oss-120b via Cerebras."
-open_url "https://cloud.cerebras.ai"
-step "Sign up with email+password or Google (GitHub OAuth not needed)."
-step "Open 'API Keys' in the left menu, click 'Create API Key'."
-step "Copy the key. It starts with 'csk-'."
-ask_secret CEREBRAS_API_KEY "Paste the Cerebras API key:"
-if [[ "$CEREBRAS_API_KEY" != csk-* ]]; then
-  warn "the key does not start with 'csk-' — double-check you copied the"
-  warn "Cerebras API key."
+say "openrouter/nvidia/nemotron-3.5-lightning:free via OpenRouter."
+open_url "https://openrouter.ai/keys"
+step "Sign in (Google or GitHub) if asked — no card is required."
+step "Click 'Create Key', give it any name."
+step "Copy the key. It starts with 'sk-or-'."
+ask_secret OPENROUTER_API_KEY "Paste the OpenRouter API key:"
+if [[ "$OPENROUTER_API_KEY" != sk-or-* ]]; then
+  warn "the key does not start with 'sk-or-' — double-check you copied the"
+  warn "OpenRouter API key."
   confirm "Use this value anyway?" || exit 1
 fi
-say "Key captured: ${#CEREBRAS_API_KEY} characters, starts with ${CEREBRAS_API_KEY:0:6}…"
+say "Key captured: ${#OPENROUTER_API_KEY} characters, starts with ${OPENROUTER_API_KEY:0:6}…"
 
-# ── Stage 2: store it as the CEREBRAS_API_KEY repository secret ─────────
-stage "GitHub: store the key as the CEREBRAS_API_KEY secret"
-set_secret CEREBRAS_API_KEY "$CEREBRAS_API_KEY"
-if [[ " ${WRITTEN_SECRET[*]-} " != *" CEREBRAS_API_KEY "* ]]; then
+# ── Stage 2: store it as the OPENROUTER_API_KEY repository secret ─────────
+stage "GitHub: store the key as the OPENROUTER_API_KEY secret"
+set_secret OPENROUTER_API_KEY "$OPENROUTER_API_KEY"
+if [[ " ${WRITTEN_SECRET[*]-} " != *" OPENROUTER_API_KEY "* ]]; then
   say "Automatic upload failed (the current gh token cannot write secrets),"
   say "so do it in the browser:"
   open_url "https://github.com/chechulina89/ai-for-developers-project-387/settings/secrets/actions"
   step "Stay on the 'Secrets' tab (not 'Variables')."
-  step "If CEREBRAS_API_KEY already exists, click its pencil / 'Update'"
+  step "If OPENROUTER_API_KEY already exists, click its pencil / 'Update'"
   step "button; otherwise click 'New repository secret'."
-  step "Name: CEREBRAS_API_KEY   Secret: paste the key, with no spaces or"
+  step "Name: OPENROUTER_API_KEY   Secret: paste the key, with no spaces or"
   step "line breaks around it. Save with 'Add secret' / 'Update secret'."
   note "The secret must be listed under 'Repository secrets' on the Actions"
   note "page — 'Environment secrets' and the Codespaces/Dependabot tabs do"
   note "not reach these workflows."
 fi
-confirm "Is CEREBRAS_API_KEY now listed under Repository secrets?" || exit 1
+confirm "Is OPENROUTER_API_KEY now listed under Repository secrets?" || exit 1
 
 # ── Stage 3: fire a probe run so the fix can be verified ──────────────────
 stage "Verify: trigger a probe agent run"
