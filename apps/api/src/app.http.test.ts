@@ -542,6 +542,58 @@ describe('booking HTTP API', () => {
     });
   });
 
+  it('keeps ongoing meetings in the owner booking list and hides past ones', async () => {
+    const store = new MemoryStore();
+    const booking = (
+      startAt: string,
+      endAt: string,
+      guestName: string,
+    ): StoredBooking => ({
+      meetingTypeId: testMeetingType.id,
+      meetingTypeTitle: testMeetingType.title,
+      durationMinutes: 60,
+      startAt: Date.parse(startAt),
+      endAt: Date.parse(endAt),
+      guestName,
+      guestPhone: '+77001234567',
+      confirmationCode: `MLY-${guestName}`,
+    });
+    store.addBooking(
+      booking('2026-11-10T08:30:00Z', '2026-11-10T09:30:00Z', 'ONGOING'),
+    );
+    store.addBooking(
+      booking('2026-11-10T06:00:00Z', '2026-11-10T07:00:00Z', 'PAST'),
+    );
+    store.addBooking(
+      booking('2026-11-11T10:00:00Z', '2026-11-11T11:00:00Z', 'FUTURE'),
+    );
+
+    await withApi(
+      async (fetch) => {
+        const login = await fetch('/api/owner/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            login: 'owner@example.test',
+            password: 'a-test-password',
+          }),
+        });
+        const cookie = login.headers.get('set-cookie')?.split(';')[0] ?? '';
+
+        const response = await fetch('/api/owner/bookings', {
+          headers: { Cookie: cookie },
+        });
+
+        expect(response.status).toBe(200);
+        const body = await response.json();
+        expect(
+          body.bookings.map((entry: { guestName: string }) => entry.guestName),
+        ).toEqual(['ONGOING', 'FUTURE']);
+      },
+      { store },
+    );
+  });
+
   it('expires the owner session after seven days', async () => {
     let currentTime = new Date(fixedNow);
 

@@ -704,7 +704,7 @@ export function buildApp(config: AppConfig) {
 
     const currentTime = now().getTime();
     const bookings = store.bookings
-      .filter((booking) => booking.startAt > currentTime)
+      .filter((booking) => booking.endAt > currentTime)
       .sort((first, second) => first.startAt - second.startAt)
       .map((booking) => ({
         meetingTypeTitle: booking.meetingTypeTitle,
