@@ -23,8 +23,10 @@ jobs:
   review:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # The opencode free-tier models need no provider key.
-    env: {}
+    # Job-level env: composite action steps inherit it (step-level env on a
+    # uses: step is not propagated).
+    env:
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     # Independent review runs only for PRs from trusted humans; bot PRs are
     # ignored.
     if: |
@@ -50,7 +52,7 @@ jobs:
       - name: Run opencode review
         uses: anomalyco/opencode/github@latest
         with:
-          model: opencode/nemotron-3.5-lightning-free
+          model: openrouter/nvidia/nemotron-3.5-lightning:free
           share: false
           prompt: |
             Ты — независимый ревьюер PR #${{ github.event.pull_request.number }}

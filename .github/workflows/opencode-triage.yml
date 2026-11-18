@@ -16,8 +16,10 @@ jobs:
   triage:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # The opencode free-tier models need no provider key.
-    env: {}
+    # Job-level env: composite action steps inherit it (step-level env on a
+    # uses: step is not propagated).
+    env:
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     # Triage runs only for new requests from trusted humans.
     # Tickets prepared by the to-spec/to-tickets skills are opened with the
     # ready-for-agent label and are skipped (label is present at `opened`).
@@ -35,7 +37,7 @@ jobs:
       - name: Run opencode triage
         uses: anomalyco/opencode/github@latest
         with:
-          model: opencode/nemotron-3.5-lightning-free
+          model: openrouter/nvidia/nemotron-3.5-lightning:free
           share: false
           prompt: |
             Триаж нового обращения #${{ github.event.issue.number }} этого
