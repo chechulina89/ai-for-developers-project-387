@@ -26,11 +26,10 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Job-level env: composite action steps inherit it (step-level env on a
-    # uses: step is not propagated into a composite action).
+    # Groq free tier: no card required, key from console.groq.com
     env:
       APP_URL: ${{ vars.APP_URL }}
-      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -107,7 +106,7 @@ jobs:
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         with:
-          model: openrouter/nvidia/nemotron-3.5-lightning:free
+          model: groq/llama-3.3-70b-versatile
           share: false
           prompt: |
             Ты — агент периодического аудита этого репозитория (сервис
