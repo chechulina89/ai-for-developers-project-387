@@ -13,16 +13,16 @@ comment command in an issue.
 
 ### Configuration summary
 
-| Setting     | Value                                                                        |
-| ----------- | ---------------------------------------------------------------------------- |
-| Event       | `issue_comment`, `types: [created]` only                                     |
-| Model       | `opencode/nemotron-3.5-lightning-free` (free opencode Zen model, no API key) |
-| `mentions`  | `/oc,/opencode`                                                              |
-| `share`     | `false` (sessions are not published)                                         |
-| Permissions | `contents: read`, `id-token: write`                                          |
-| Timeout     | 30 minutes                                                                   |
-| Concurrency | one run per issue, previous run is cancelled                                 |
-| Auth        | OIDC token exchange with the opencode-agent GitHub App                       |
+| Setting     | Value                                                                                                                                                       |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Event       | `issue_comment`, `types: [created]` only                                                                                                                    |
+| Model       | `openrouter/nvidia/nemotron-3.5-lightning:free` for `opencode`, `opencode-review`, `scheduled-audit`; `zai/glm-4.5-flash` (free tier) for `opencode-triage` |
+| `mentions`  | `/oc,/opencode`                                                                                                                                             |
+| `share`     | `false` (sessions are not published)                                                                                                                        |
+| Permissions | `contents: read`, `id-token: write`                                                                                                                         |
+| Timeout     | 30 minutes                                                                                                                                                  |
+| Concurrency | one run per issue, previous run is cancelled                                                                                                                |
+| Auth        | OIDC token exchange with the opencode-agent GitHub App                                                                                                      |
 
 ### Access control
 
@@ -51,41 +51,42 @@ record the reason here and in `README.md`.
 
 ### 2. Model key
 
-The configured model `opencode/nemotron-3.5-lightning-free` is a free opencode
-Zen model and needs **no provider key** — nothing to create in the repository
-secrets for the model itself. It replaced `opencode/deepseek-v4.1-flash-free`
-on 2026-11-18 because DeepSeek agent sessions hung until the run timeout on
-triage runs; nemotron answers a probe instantly and is verified working by the
-agent step of the scheduled-audit run on main. If the Zen quota runs out
-again, the documented fallbacks below apply.
+Two providers are configured today:
 
-All four agent workflows (`opencode`, `opencode-triage`, `opencode-review`,
-`scheduled-audit`) use the same model. When a provider key is configured, it
-is passed as job-level `env`: step-level `env` on a `uses:` step is not
-propagated into the composite opencode action.
+- `opencode`, `opencode-review`, `scheduled-audit` run on
+  `openrouter/nvidia/nemotron-3.5-lightning:free` and need the
+  `OPENROUTER_API_KEY` repository secret (free key at
+  [OpenRouter → Keys](https://openrouter.ai/keys), no card, ~50
+  requests/day on the no-purchase tier).
+- `opencode-triage` runs on `zai/glm-4.5-flash` and needs the
+  `ZHIPU_API_KEY` repository secret (free key at
+  [z.ai → API keys](https://z.ai/manage-apikey/apikey-list), no card).
+  Chosen on 2026-11-18 because it was the only provider that completed the
+  full triage loop while both daily quotas above were exhausted. The z.ai
+  free tier occasionally answers `1305 service temporarily overloaded`;
+  re-triggering the issue (close + open a new one) usually gets through.
+
+The provider key is passed as job-level `env`: step-level `env` on a
+`uses:` step is not propagated into the composite opencode action. The
+triage job additionally sets `GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` and
+`issues: write`, so the agent's own `gh` commands can apply the label and
+post the comment.
 
 Earlier setups and why they were replaced:
 
-- `openrouter/nvidia/nemotron-3.5-lightning:free` (`OPENROUTER_API_KEY`
-  secret, free key at [OpenRouter → Keys](https://openrouter.ai/keys), no
-  card): worked reliably, but the no-purchase tier is capped at ~50
-  requests/day (`402 Insufficient credits`) and the demo's probe runs
-  exhausted it mid-day; the UTC-midnight reset proved unreliable, so the
-  demo could not wait for it. Still the better option for regular use.
-- Free opencode Zen models (`opencode/deepseek-v4.1-flash-free`,
-  `opencode/glm-5.3-flash-free`) need no key, but the daily free quota is
-  exhausted by one or two agent sessions (`FreeUsageLimitError`, reset at
-  UTC midnight) — acceptable for a one-day demo, not for regular use.
-  `deepseek-v4.1-flash-free` additionally stalled on triage runs (no output
-  until the 15-minute timeout), so the current choice within Zen is
-  `opencode/nemotron-3.5-lightning-free`.
+- Free opencode Zen models (`opencode/nemotron-3.5-lightning-free`,
+  `opencode/deepseek-v4.1-flash-free`, `opencode/glm-5.3-flash-free`) need
+  no key, but the daily free quota is exhausted by one or two agent
+  sessions (`FreeUsageLimitError`, reset at UTC midnight) — acceptable for
+  a one-day demo, not for regular use.
 - `google/gemini-2.5-flash` with a Google AI Studio key failed with
   account-level `403 ACCESS_DENIED` from `generativelanguage.googleapis.com`
   (new-format `AQ.` keys; the project/account was denied the service), so it
   never produced a single answer.
-- Groq's free plan: `llama-3.3-70b-versatile` moved to Enterprise (`Model
-not found` on the free key); the free replacement `groq/openai/gpt-oss-120b`
-  caps at 8000 TPM while one agent request with tools and context is ~25K
+- Groq's free plan: `llama-3.3-70b-versatile` was retired (`Model
+not found` on the free key); the free replacements
+  `groq/openai/gpt-oss-120b` and `groq/openai/gpt-oss-20b` hard-cap single
+  requests at 8000 TPM while an agent context inevitably exceeds ~24K
   tokens (`Request too large`), so the Groq free tier cannot serve agent
   prompts at all.
 - Cerebras Cloud ended its no-card free tier in July 2026: a payment

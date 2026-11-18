@@ -32,31 +32,30 @@ comments. The workflow lives in
 the `anomalyco/opencode/github` action.
 
 - **Event:** `issue_comment` with `types: [created]` only.
-- **Model:** `opencode/nemotron-3.5-lightning-free` — a free opencode Zen
-  model that needs no provider key at all. It replaced
-  `opencode/deepseek-v4.1-flash-free` on 2026-11-18 because DeepSeek agent
-  sessions repeatedly hung until the 15-minute run timeout (review run on
-  PR #29 succeeded once, but triage runs stalled with no output); the
-  nemotron model answers a probe instantly and is verified working by the
-  agent step of the scheduled-audit run on main.
+- **Model:** `openrouter/nvidia/nemotron-3.5-lightning:free` (secret
+  `OPENROUTER_API_KEY`, ~50 requests/day on the no-purchase tier) — except
+  the triage workflow, which uses `zai/glm-4.5-flash` (secret
+  `ZHIPU_API_KEY`, free tier) since 2026-11-18: the z.ai free tier was the
+  only provider that completed the full triage loop (label + comment by the
+  agent itself, [issue #42](./issues/42)) when the OpenRouter and opencode
+  Zen daily quotas were both exhausted.
   Earlier setups were abandoned, all recorded here as deliberate decisions:
-  free opencode Zen models exhaust their daily quota in one or two agent
+  free opencode Zen models (`nemotron-3.5-lightning-free`,
+  `deepseek-v4.1-flash-free`) exhaust their daily quota in one or two agent
   sessions (`FreeUsageLimitError`, reset at UTC midnight) — acceptable for
   a one-day demo, not for regular use; OpenRouter's no-purchase free tier
-  (`openrouter/nvidia/nemotron-3.5-lightning:free`, `OPENROUTER_API_KEY`
-  secret, ~50 requests/day) worked reliably but ran out during the demo
-  (`402 Insufficient credits`) and its midnight reset proved unreliable;
+  worked reliably but ran out during the demo (`402 Insufficient credits`)
+  and its midnight reset proved unreliable;
   a Google AI Studio key for `google/gemini-2.5-flash` was rejected with
   account-level `403 ACCESS_DENIED`; Groq's `llama-3.3-70b-versatile` was
-  moved to the Enterprise plan (`Model not found` on the free key), and
-  the free-plan replacement `openai/gpt-oss-120b` caps at 8000 TPM — a
-  single agent request with tools and context is ~25K tokens
+  retired (`Model not found` on the free key), and the free-plan models
+  `openai/gpt-oss-120b`/`gpt-oss-20b` hard-cap single requests at 8000 TPM
+  while an agent context inevitably exceeds ~24K tokens
   (`Request too large`), so Groq's free tier cannot serve agent prompts
   at all; Cerebras Cloud ended its no-card free tier in July 2026 (a
   payment method is now required even for the $5 trial credit).
-  All four agent workflows use the same model; when a provider key is
-  configured, it reaches the composite action via job-level `env`
-  (step-level `env` on a `uses:` step is not propagated).
+  When a provider key is configured, it reaches the composite action via
+  job-level `env` (step-level `env` on a `uses:` step is not propagated).
 - **Purpose:** answer questions about issues, triage them, and propose fixes
   from a comment command.
 - **Results:** the agent replies as an issue comment and links its workflow
@@ -109,9 +108,14 @@ summary comment.
   `to-tickets` skills carry the `ready-for-agent` label at creation and are
   skipped by the job condition (and again by the prompt as a safeguard).
 - **Limits:** 15 minute timeout; one run per issue (`concurrency` cancels the
-  previous run). Same OIDC permissions as the agent workflow
-  (`contents: read`, `id-token: write`, checkout with
-  `persist-credentials: false`).
+  previous run). OIDC permissions plus `issues: write` with `GH_TOKEN`
+  exposed to the agent's shell, so its own `gh` commands can apply the label
+  and post the comment (checkout still uses `persist-credentials: false`).
+- **Verified end to end:** [issue #42](./issues/42) was labelled
+  `ready-for-agent` and commented by the agent itself
+  ([run 44280533797](../../actions/runs/44280533797)); the ready-ticket skip
+  was verified on [issue #43](./issues/43)
+  ([run 44280963225](../../actions/runs/44280963225), conclusion `skipped`).
 - **Agent vs script:** the label and the summary comment are the agent's own
   output; the trigger condition, the ready-ticket skip, and the concurrency
   limit are plain workflow logic that runs no model.
