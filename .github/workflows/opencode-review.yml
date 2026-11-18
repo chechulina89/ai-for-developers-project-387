@@ -50,7 +50,7 @@ jobs:
       - name: Run opencode review
         uses: anomalyco/opencode/github@latest
         with:
-          model: opencode/deepseek-v4.1-flash-free
+          model: opencode/nemotron-3.5-lightning-free
           share: false
           prompt: |
             Ты — независимый ревьюер PR #${{ github.event.pull_request.number }}

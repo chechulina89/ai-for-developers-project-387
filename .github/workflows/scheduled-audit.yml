@@ -105,7 +105,7 @@ jobs:
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         with:
-          model: opencode/deepseek-v4.1-flash-free
+          model: opencode/nemotron-3.5-lightning-free
           share: false
           prompt: |
             Ты — агент периодического аудита этого репозитория (сервис
