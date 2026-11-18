@@ -15,7 +15,9 @@ concurrency:
 jobs:
   triage:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
+    # Groq free tier: gpt-oss-20b is capped at 8000 TPM, so the agent
+    # progresses in per-minute bursts; the job needs an hour to finish.
     # Job-level env: composite action steps inherit it (step-level env on a
     # uses: step is not propagated).
     env:
