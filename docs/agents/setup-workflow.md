@@ -13,16 +13,16 @@ comment command in an issue.
 
 ### Configuration summary
 
-| Setting     | Value                                                                         |
-| ----------- | ----------------------------------------------------------------------------- |
-| Event       | `issue_comment`, `types: [created]` only                                      |
-| Model       | `opencode/deepseek-v4.1-flash-free` (free opencode Zen model, no API key)     |
-| `mentions`  | `/oc,/opencode`                                                               |
-| `share`     | `false` (sessions are not published)                                          |
-| Permissions | `contents: read`, `id-token: write`                                           |
-| Timeout     | 30 minutes                                                                    |
-| Concurrency | one run per issue, previous run is cancelled                                  |
-| Auth        | OIDC token exchange with the opencode-agent GitHub App                        |
+| Setting     | Value                                                                     |
+| ----------- | ------------------------------------------------------------------------- |
+| Event       | `issue_comment`, `types: [created]` only                                  |
+| Model       | `opencode/deepseek-v4.1-flash-free` (free opencode Zen model, no API key) |
+| `mentions`  | `/oc,/opencode`                                                           |
+| `share`     | `false` (sessions are not published)                                      |
+| Permissions | `contents: read`, `id-token: write`                                       |
+| Timeout     | 30 minutes                                                                |
+| Concurrency | one run per issue, previous run is cancelled                              |
+| Auth        | OIDC token exchange with the opencode-agent GitHub App                    |
 
 ### Access control
 
@@ -81,7 +81,7 @@ Earlier setups and why they were replaced:
   (new-format `AQ.` keys; the project/account was denied the service), so it
   never produced a single answer.
 - Groq's free plan: `llama-3.3-70b-versatile` moved to Enterprise (`Model
-  not found` on the free key); the free replacement `groq/openai/gpt-oss-120b`
+not found` on the free key); the free replacement `groq/openai/gpt-oss-120b`
   caps at 8000 TPM while one agent request with tools and context is ~25K
   tokens (`Request too large`), so the Groq free tier cannot serve agent
   prompts at all.
