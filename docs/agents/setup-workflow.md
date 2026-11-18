@@ -16,7 +16,7 @@ comment command in an issue.
 | Setting     | Value                                                                         |
 | ----------- | ----------------------------------------------------------------------------- |
 | Event       | `issue_comment`, `types: [created]` only                                      |
-| Model       | `openrouter/nvidia/nemotron-3.5-lightning:free` (`OPENROUTER_API_KEY` secret) |
+| Model       | `opencode/deepseek-v4.1-flash-free` (free opencode Zen model, no API key)     |
 | `mentions`  | `/oc,/opencode`                                                               |
 | `share`     | `false` (sessions are not published)                                          |
 | Permissions | `contents: read`, `id-token: write`                                           |
@@ -51,40 +51,40 @@ record the reason here and in `README.md`.
 
 ### 2. Model key
 
-The configured model `openrouter/nvidia/nemotron-3.5-lightning:free` reads the provider key
-from the `OPENROUTER_API_KEY` environment variable, supplied from a repository
-secret:
-
-1. Create a free key at [OpenRouter → Keys](https://openrouter.ai/keys)
-   (Google or GitHub sign-in; no card required; the free tier is ~50
-   requests/day, resetting at UTC midnight).
-2. Settings → Secrets and variables → Actions → New repository secret:
-   - **Name:** `OPENROUTER_API_KEY`
-   - **Value:** the created key (starts with `sk-or-`)
+The configured model `opencode/deepseek-v4.1-flash-free` is a free opencode
+Zen model and needs **no provider key** — nothing to create in the repository
+secrets for the model itself. The switch was made on 2026-11-18 to finish the
+mentor-feedback demo the same day after the OpenRouter daily quota ran out
+mid-demo; the Zen quota resets at UTC midnight and had recovered by then.
+Verified working by the successful review run on PR #29. If the Zen quota
+runs out again, the documented fallbacks below apply.
 
 All four agent workflows (`opencode`, `opencode-triage`, `opencode-review`,
-`scheduled-audit`) use the same model and secret. The key is passed as
-job-level `env`: step-level `env` on a `uses:` step is not propagated into
-the composite opencode action.
+`scheduled-audit`) use the same model. When a provider key is configured, it
+is passed as job-level `env`: step-level `env` on a `uses:` step is not
+propagated into the composite opencode action.
 
 Earlier setups and why they were replaced:
 
+- `openrouter/nvidia/nemotron-3.5-lightning:free` (`OPENROUTER_API_KEY`
+  secret, free key at [OpenRouter → Keys](https://openrouter.ai/keys), no
+  card): worked reliably, but the no-purchase tier is capped at ~50
+  requests/day (`402 Insufficient credits`) and the demo's probe runs
+  exhausted it mid-day; the UTC-midnight reset proved unreliable, so the
+  demo could not wait for it. Still the better option for regular use.
 - Free opencode Zen models (`opencode/deepseek-v4.1-flash-free`, then
   `opencode/glm-5.3-flash-free`) need no key, but the daily free quota is
   exhausted by one or two agent sessions (`FreeUsageLimitError`, reset at
-  UTC midnight), which made triage and review runs unreliable.
+  UTC midnight) — acceptable for a one-day demo, not for regular use.
 - `google/gemini-2.5-flash` with a Google AI Studio key failed with
   account-level `403 ACCESS_DENIED` from `generativelanguage.googleapis.com`
   (new-format `AQ.` keys; the project/account was denied the service), so it
   never produced a single answer.
-- OpenRouter free tier note: the no-purchase tier is capped at ~50
-  requests/day (`402 Insufficient credits`), which a few agent sessions
-  exhaust — keep probe runs rare and expect the quota to reset at UTC
-  midnight.
 - Groq's free plan: `llama-3.3-70b-versatile` moved to Enterprise (`Model
-not found`); the free replacement `groq/openai/gpt-oss-120b` caps at
-  8000 TPM while one agent request with tools and context is ~25K tokens
-  (`Request too large`), so the Groq free tier cannot serve agent prompts.
+  not found` on the free key); the free replacement `groq/openai/gpt-oss-120b`
+  caps at 8000 TPM while one agent request with tools and context is ~25K
+  tokens (`Request too large`), so the Groq free tier cannot serve agent
+  prompts at all.
 - Cerebras Cloud ended its no-card free tier in July 2026: a payment
   method is required even to activate the $5 trial credit.
 
