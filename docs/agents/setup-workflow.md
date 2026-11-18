@@ -13,16 +13,16 @@ comment command in an issue.
 
 ### Configuration summary
 
-| Setting     | Value                                                                     |
-| ----------- | ------------------------------------------------------------------------- |
-| Event       | `issue_comment`, `types: [created]` only                                  |
-| Model       | `opencode/deepseek-v4.1-flash-free` (free opencode Zen model, no API key) |
-| `mentions`  | `/oc,/opencode`                                                           |
-| `share`     | `false` (sessions are not published)                                      |
-| Permissions | `contents: read`, `id-token: write`                                       |
-| Timeout     | 30 minutes                                                                |
-| Concurrency | one run per issue, previous run is cancelled                              |
-| Auth        | OIDC token exchange with the opencode-agent GitHub App                    |
+| Setting     | Value                                                                        |
+| ----------- | ---------------------------------------------------------------------------- |
+| Event       | `issue_comment`, `types: [created]` only                                     |
+| Model       | `opencode/nemotron-3.5-lightning-free` (free opencode Zen model, no API key) |
+| `mentions`  | `/oc,/opencode`                                                              |
+| `share`     | `false` (sessions are not published)                                         |
+| Permissions | `contents: read`, `id-token: write`                                          |
+| Timeout     | 30 minutes                                                                   |
+| Concurrency | one run per issue, previous run is cancelled                                 |
+| Auth        | OIDC token exchange with the opencode-agent GitHub App                       |
 
 ### Access control
 
@@ -51,13 +51,13 @@ record the reason here and in `README.md`.
 
 ### 2. Model key
 
-The configured model `opencode/deepseek-v4.1-flash-free` is a free opencode
+The configured model `opencode/nemotron-3.5-lightning-free` is a free opencode
 Zen model and needs **no provider key** — nothing to create in the repository
-secrets for the model itself. The switch was made on 2026-11-18 to finish the
-mentor-feedback demo the same day after the OpenRouter daily quota ran out
-mid-demo; the Zen quota resets at UTC midnight and had recovered by then.
-Verified working by the successful review run on PR #29. If the Zen quota
-runs out again, the documented fallbacks below apply.
+secrets for the model itself. It replaced `opencode/deepseek-v4.1-flash-free`
+on 2026-11-18 because DeepSeek agent sessions hung until the run timeout on
+triage runs; nemotron answers a probe instantly and is verified working by the
+agent step of the scheduled-audit run on main. If the Zen quota runs out
+again, the documented fallbacks below apply.
 
 All four agent workflows (`opencode`, `opencode-triage`, `opencode-review`,
 `scheduled-audit`) use the same model. When a provider key is configured, it
@@ -72,10 +72,13 @@ Earlier setups and why they were replaced:
   requests/day (`402 Insufficient credits`) and the demo's probe runs
   exhausted it mid-day; the UTC-midnight reset proved unreliable, so the
   demo could not wait for it. Still the better option for regular use.
-- Free opencode Zen models (`opencode/deepseek-v4.1-flash-free`, then
+- Free opencode Zen models (`opencode/deepseek-v4.1-flash-free`,
   `opencode/glm-5.3-flash-free`) need no key, but the daily free quota is
   exhausted by one or two agent sessions (`FreeUsageLimitError`, reset at
   UTC midnight) — acceptable for a one-day demo, not for regular use.
+  `deepseek-v4.1-flash-free` additionally stalled on triage runs (no output
+  until the 15-minute timeout), so the current choice within Zen is
+  `opencode/nemotron-3.5-lightning-free`.
 - `google/gemini-2.5-flash` with a Google AI Studio key failed with
   account-level `403 ACCESS_DENIED` from `generativelanguage.googleapis.com`
   (new-format `AQ.` keys; the project/account was denied the service), so it

@@ -32,15 +32,15 @@ comments. The workflow lives in
 the `anomalyco/opencode/github` action.
 
 - **Event:** `issue_comment` with `types: [created]` only.
-- **Model:** `opencode/deepseek-v4.1-flash-free` — a free opencode Zen
-  model that needs no provider key at all. The switch was made to finish
-  the mentor-feedback demo on 2026-11-18 after the OpenRouter daily quota
-  ran out mid-demo; the Zen daily quota resets at UTC midnight and had
-  recovered by then. The model is verified working by the successful
-  review run on PR #29.
+- **Model:** `opencode/nemotron-3.5-lightning-free` — a free opencode Zen
+  model that needs no provider key at all. It replaced
+  `opencode/deepseek-v4.1-flash-free` on 2026-11-18 because DeepSeek agent
+  sessions repeatedly hung until the 15-minute run timeout (review run on
+  PR #29 succeeded once, but triage runs stalled with no output); the
+  nemotron model answers a probe instantly and is verified working by the
+  agent step of the scheduled-audit run on main.
   Earlier setups were abandoned, all recorded here as deliberate decisions:
-  free opencode Zen models (`deepseek-v4.1-flash-free`,
-  `glm-5.3-flash-free`) exhaust their daily quota in one or two agent
+  free opencode Zen models exhaust their daily quota in one or two agent
   sessions (`FreeUsageLimitError`, reset at UTC midnight) — acceptable for
   a one-day demo, not for regular use; OpenRouter's no-purchase free tier
   (`openrouter/nvidia/nemotron-3.5-lightning:free`, `OPENROUTER_API_KEY`
