@@ -7,6 +7,10 @@ on:
 permissions:
   contents: read
   id-token: write
+  # issues: write lets the agent's shell (gh) apply the triage label and post
+  # the triage comment itself; GITHUB_TOKEN is exposed to the agent as
+  # GH_TOKEN below.
+  issues: write
 
 concurrency:
   group: triage-${{ github.event.issue.number }}
@@ -20,6 +24,7 @@ jobs:
     # uses: step is not propagated).
     env:
       ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     # Triage runs only for new requests from trusted humans.
     # Tickets prepared by the to-spec/to-tickets skills are opened with the
     # ready-for-agent label and are skipped (label is present at `opened`).
