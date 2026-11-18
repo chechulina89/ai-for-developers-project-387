@@ -22,9 +22,8 @@ jobs:
   opencode:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # Groq free tier: no card required, key from console.groq.com
-    env:
-      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+    # The opencode free-tier models need no provider key.
+    env: {}
     # Only trusted humans can invoke the agent:
     # - bot comments are ignored
     # - only OWNER, MEMBER or COLLABORATOR associations pass, so untrusted
@@ -43,6 +42,6 @@ jobs:
       - name: Run opencode
         uses: anomalyco/opencode/github@latest
         with:
-          model: groq/llama-3.3-70b-versatile
+          model: opencode/deepseek-v4.1-flash-free
           mentions: /oc,/opencode
           share: false
