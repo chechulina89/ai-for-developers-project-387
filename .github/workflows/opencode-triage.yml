@@ -15,13 +15,11 @@ concurrency:
 jobs:
   triage:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    # Groq free tier: gpt-oss-20b is capped at 8000 TPM, so the agent
-    # progresses in per-minute bursts; the job needs an hour to finish.
+    timeout-minutes: 15
     # Job-level env: composite action steps inherit it (step-level env on a
     # uses: step is not propagated).
     env:
-      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
     # Triage runs only for new requests from trusted humans.
     # Tickets prepared by the to-spec/to-tickets skills are opened with the
     # ready-for-agent label and are skipped (label is present at `opened`).
@@ -39,7 +37,7 @@ jobs:
       - name: Run opencode triage
         uses: anomalyco/opencode/github@latest
         with:
-          model: groq/openai/gpt-oss-20b
+          model: zai/glm-4.5-flash
           share: false
           prompt: |
             Триаж нового обращения #${{ github.event.issue.number }} этого
