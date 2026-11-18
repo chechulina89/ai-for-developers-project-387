@@ -32,26 +32,31 @@ comments. The workflow lives in
 the `anomalyco/opencode/github` action.
 
 - **Event:** `issue_comment` with `types: [created]` only.
-- **Model:** `openrouter/nvidia/nemotron-3.5-lightning:free`, read from
-  the `OPENROUTER_API_KEY` repository secret (a free
-  [OpenRouter](https://openrouter.ai/keys) key; no card needed, the free
-  tier is ~50 requests/day and resets at UTC midnight — enough for the
-  demo when probe runs stay rare).
+- **Model:** `opencode/deepseek-v4.1-flash-free` — a free opencode Zen
+  model that needs no provider key at all. The switch was made to finish
+  the mentor-feedback demo on 2026-11-18 after the OpenRouter daily quota
+  ran out mid-demo; the Zen daily quota resets at UTC midnight and had
+  recovered by then. The model is verified working by the successful
+  review run on PR #29.
   Earlier setups were abandoned, all recorded here as deliberate decisions:
   free opencode Zen models (`deepseek-v4.1-flash-free`,
   `glm-5.3-flash-free`) exhaust their daily quota in one or two agent
-  sessions (`FreeUsageLimitError`, reset at UTC midnight); a Google AI
-  Studio key for `google/gemini-2.5-flash` was rejected with account-level
-  `403 ACCESS_DENIED`; Groq's `llama-3.3-70b-versatile` was moved to the
-  Enterprise plan (`Model not found` on the free key), and the free-plan
-  replacement `openai/gpt-oss-120b` caps at 8000 TPM — a single agent
-  request with tools and context is ~25K tokens (`Request too large`), so
-  Groq's free tier cannot serve agent prompts at all; Cerebras Cloud
-  ended its no-card free tier in July 2026 (a payment method is now
-  required even for the $5 trial credit).
-  The same model and secret are used by all four agent workflows; the key
-  reaches the composite action via job-level `env` (step-level `env` on a
-  `uses:` step is not propagated).
+  sessions (`FreeUsageLimitError`, reset at UTC midnight) — acceptable for
+  a one-day demo, not for regular use; OpenRouter's no-purchase free tier
+  (`openrouter/nvidia/nemotron-3.5-lightning:free`, `OPENROUTER_API_KEY`
+  secret, ~50 requests/day) worked reliably but ran out during the demo
+  (`402 Insufficient credits`) and its midnight reset proved unreliable;
+  a Google AI Studio key for `google/gemini-2.5-flash` was rejected with
+  account-level `403 ACCESS_DENIED`; Groq's `llama-3.3-70b-versatile` was
+  moved to the Enterprise plan (`Model not found` on the free key), and
+  the free-plan replacement `openai/gpt-oss-120b` caps at 8000 TPM — a
+  single agent request with tools and context is ~25K tokens
+  (`Request too large`), so Groq's free tier cannot serve agent prompts
+  at all; Cerebras Cloud ended its no-card free tier in July 2026 (a
+  payment method is now required even for the $5 trial credit).
+  All four agent workflows use the same model; when a provider key is
+  configured, it reaches the composite action via job-level `env`
+  (step-level `env` on a `uses:` step is not propagated).
 - **Purpose:** answer questions about issues, triage them, and propose fixes
   from a comment command.
 - **Results:** the agent replies as an issue comment and links its workflow
